@@ -408,14 +408,28 @@ Related to #130"
 - **Detailed Analysis**: Add verbose logging for unclear issues
 - **Root Cause**: Focus on making things work properly, not just fixing errors
 
-### Language & Documentation
-- **Korean Primary**: All communication and documentation in Korean except technical terms
-- **English for IaC**: Cloud resource descriptions in infrastructure code should be in English
-- **Technical Terms**: Preserve original names for libraries and technical concepts
-- **Documentation Updates**: Update docs alongside code changes
-- **Code Comments**: Add comments for complex logic and algorithms
-- **Synchronized Updates**: Keep documentation in sync with code changes
-- **Clarity First**: Prioritize clear documentation over brevity
+### Language & Documentation Rules
+- **한국어 우선 원칙**: 모든 커뮤니케이션과 문서 작업은 한국어로 진행
+- **문서 작성 언어**: 
+  - README.md, CLAUDE.md, 설계 문서 → 한국어 작성
+  - 코드 주석 → 한국어로 작성 (복잡한 로직 설명시)
+  - 커밋 메시지 → 한국어 설명 포함
+  - 이슈 및 PR 설명 → 한국어로 작성
+- **기술 용어 처리**:
+  - 라이브러리명, 프레임워크명 → 원문 유지 (React, TypeScript, DynamoDB 등)
+  - API 명칭, 함수명 → 원문 유지
+  - 기술 개념 설명 → 한국어로 번역하되 원문 병기
+- **예외 상황**: 
+  - **IaC 코드**: AWS 리소스 description은 영문으로 작성
+  - **국제 표준**: OpenAPI, JSON Schema 등 국제 표준 문서는 영문 허용
+- **문서 품질 기준**:
+  - 명확성 우선: 간결함보다 명확한 설명 우선
+  - 동기화 유지: 코드 변경시 관련 문서 함께 업데이트
+  - 예시 포함: 실용적인 예시와 함께 설명 제공
+- **커뮤니케이션 스타일**:
+  - 정중하고 전문적인 어조 유지
+  - 기술적 내용도 이해하기 쉽게 설명
+  - 질문이나 요청시 구체적이고 상세한 답변 제공
 
 ## Testing Strategy
 
