@@ -305,10 +305,45 @@ main                              # Production-ready code
 
 #### GitHub Issue Management
 - **Issue Templates**: Use templates for consistent issue creation
-- **Labels**: Apply appropriate labels (bug, enhancement, documentation, etc.)
+- **Labels**: Apply appropriate labels using standardized label system
 - **Milestones**: Group related issues into milestones
 - **Assignees**: Assign issues to team members
 - **Projects**: Link issues to GitHub Projects for tracking
+
+#### GitHub Labels (표준 라벨 시스템)
+
+**기본 GitHub 라벨**:
+- `bug` - 버그 및 오류 수정 (#d73a4a)
+- `documentation` - 문서화 작업 (#0075ca)
+- `enhancement` - 새로운 기능 또는 개선 (#a2eeef)
+- `duplicate` - 중복된 이슈 또는 PR (#cfd3d7)
+- `good first issue` - 신규 기여자용 작업 (#7057ff)
+- `help wanted` - 도움이 필요한 작업 (#008672)
+- `invalid` - 잘못된 이슈 (#e4e669)
+- `question` - 질문 또는 추가 정보 요청 (#d876e3)
+- `wontfix` - 수정하지 않을 이슈 (#ffffff)
+
+**DevOps 프로젝트 전용 라벨**:
+- `devops` - DevOps 관련 작업 (#0052CC)
+- `phase1` - DevOps Phase 1 작업 (#1D76DB)
+- `phase2` - DevOps Phase 2 작업 (#2E8B57)  
+- `phase3` - DevOps Phase 3 작업 (#8B4513)
+- `epic` - 대규모 작업 단위 (#B60205)
+
+**기술 영역별 라벨**:
+- `ci-cd` - CI/CD 파이프라인 관련 (#5319E7)
+- `monitoring` - 모니터링 및 관측성 (#FF8C00)
+- `security` - 보안 관련 작업 (#D93F0B)
+- `aws` - AWS 서비스 관련 (#FF9900)
+- `docker` - Docker 컨테이너 관련 (#2496ED)
+- `automation` - 자동화 개선 (#7057FF)
+- `optimization` - 성능 및 비용 최적화 (#FBCA04)
+
+**라벨 사용 규칙**:
+- 이슈 생성시 최소 1개 이상의 라벨 필수 적용
+- Phase 라벨은 DevOps 프로젝트에서만 사용
+- Epic 라벨은 5개 이상의 하위 작업이 있는 경우에만 사용
+- 기술 영역 라벨은 구체적인 기술 스택과 관련된 작업에 적용
 
 #### Branch Protection Rules
 - **Main Branch**: Protected with required reviews
