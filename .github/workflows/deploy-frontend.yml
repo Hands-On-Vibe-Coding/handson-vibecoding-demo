@@ -1,12 +1,10 @@
 name: 프론트엔드 GitHub Pages 배포
 
 on:
-  push:
-    branches: [ "main" ]
-    paths:
-      - 'frontend/**'
-      - 'shared/**'
-      - '.github/workflows/deploy-frontend.yml'
+  workflow_run:
+    workflows: ["CI/CD Pipeline"]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -20,6 +18,8 @@ concurrency:
 
 jobs:
   build:
+    # CI 성공 시에만 실행
+    if: github.event.workflow_run.conclusion == 'success' 
     runs-on: ubuntu-latest
     steps:
       - name: 코드 체크아웃
