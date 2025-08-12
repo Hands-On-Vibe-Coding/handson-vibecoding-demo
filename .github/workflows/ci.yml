@@ -17,18 +17,16 @@ jobs:
       frontend: ${{ steps.filter.outputs.frontend }}
       backend: ${{ steps.filter.outputs.backend }}
       shared: ${{ steps.filter.outputs.shared }}
-      workflow: ${{ steps.filter.outputs.workflow }}
     steps:
-      - name: Checkout 코드 (전체 히스토리)
+      - name: Checkout 코드
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # 전체 히스토리를 가져와 안정적인 diff 계산
+          fetch-depth: 0
           
       - name: 변경사항 감지
         uses: dorny/paths-filter@v3
         id: filter
         with:
-          # 안정적인 비교를 위해 명시적 base 설정
           base: ${{ github.event.repository.default_branch }}
           filters: |
             frontend:
@@ -44,26 +42,12 @@ jobs:
             shared:
               - 'shared/**'
               - 'package.json'
-            workflow:
-              - '.github/workflows/**'
               
-      - name: 변경사항 감지 결과 출력 (디버깅용)
-        run: |
-          echo "Frontend 변경: ${{ steps.filter.outputs.frontend }}"
-          echo "Backend 변경: ${{ steps.filter.outputs.backend }}"
-          echo "Shared 변경: ${{ steps.filter.outputs.shared }}"
-          echo "Workflow 변경: ${{ steps.filter.outputs.workflow }}"
-          echo "GitHub 이벤트 정보:"
-          echo "  Ref: ${{ github.ref }}"
-          echo "  Before SHA: ${{ github.event.before }}"
-          echo "  After SHA: ${{ github.sha }}"
-          echo "변경된 파일 목록:"
-          git diff --name-only ${{ github.event.before }}..${{ github.sha }} || echo "이전 커밋을 찾을 수 없습니다"
 
   # Shared 모듈 빌드 및 테스트
   shared:
     needs: changes
-    if: needs.changes.outputs.shared == 'true'
+    if: fromJSON(needs.changes.outputs.shared)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 코드
@@ -90,7 +74,7 @@ jobs:
   # 프론트엔드 빌드, 테스트, 린트
   frontend:
     needs: [changes, shared]
-    if: always() && needs.changes.outputs.frontend == 'true' && (needs.shared.result == 'success' || needs.shared.result == 'skipped')
+    if: always() && fromJSON(needs.changes.outputs.frontend) && (needs.shared.result == 'success' || needs.shared.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 코드
@@ -127,7 +111,7 @@ jobs:
   # 백엔드 빌드, 테스트, 린트
   backend:
     needs: [changes, shared]
-    if: always() && needs.changes.outputs.backend == 'true' && (needs.shared.result == 'success' || needs.shared.result == 'skipped')
+    if: always() && fromJSON(needs.changes.outputs.backend) && (needs.shared.result == 'success' || needs.shared.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 코드
@@ -169,10 +153,7 @@ jobs:
   # 프론트엔드 배포 (main 브랜치 + 프론트엔드 변경 + 빌드 성공 시)
   deploy-frontend:
     needs: [changes, frontend]
-    if: |
-      github.ref == 'refs/heads/main' && 
-      needs.changes.outputs.frontend == 'true' && 
-      needs.frontend.result == 'success'
+    if: ${{ github.ref_name == 'main' && fromJSON(needs.changes.outputs.frontend) && needs.frontend.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -223,10 +204,7 @@ jobs:
   # 백엔드 배포 (main 브랜치 + 백엔드 변경 + 빌드 성공 시)  
   deploy-backend:
     needs: [changes, backend]
-    if: |
-      github.ref == 'refs/heads/main' && 
-      needs.changes.outputs.backend == 'true' && 
-      needs.backend.result == 'success'
+    if: ${{ github.ref_name == 'main' && fromJSON(needs.changes.outputs.backend) && needs.backend.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
