@@ -1,11 +1,10 @@
-name: 프론트엔드 배포
+# 이 워크플로우는 ci.yml에 통합되었습니다.
+# CI/CD 파이프라인에서 테스트 통과 후 자동 배포됩니다.
+
+name: 프론트엔드 배포 (비활성화됨)
 
 on:
-  push:
-    branches: [ "main" ]
-    paths:
-      - 'frontend/**'
-      - '.github/workflows/deploy-frontend.yml'
+  # 트리거 비활성화 - ci.yml에서 통합 관리
   workflow_dispatch:
 
 permissions:
@@ -37,7 +36,7 @@ jobs:
           HUSKY=0 npm install
       
       - name: shared 패키지 빌드
-        run: npm run build:shared
+        run: npm run shared:build
       
       - name: 프론트엔드 빌드
         run: |

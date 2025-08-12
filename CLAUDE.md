@@ -567,3 +567,4 @@ The project also incorporates Windsurf development rules from `global_windsurf_r
 - Infrastructure code descriptions should be in English for AWS resources
 - Pre-commit hooks enforce quality gates automatically - never bypass with `--no-verify`
 - Follow the design documents in `docs/design/` for architectural decisions
+- 이슈를 닫을때에는 반드시 증거를 첨부해줘.
