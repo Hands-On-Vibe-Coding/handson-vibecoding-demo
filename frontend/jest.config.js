@@ -5,7 +5,7 @@ export default {
     '^@vibecoding-demo/shared$': '<rootDir>/../shared/dist',
     '^@shared/(.*)$': '<rootDir>/../shared/src/$1'
   },
-  testPathIgnorePatterns: ['/node_modules/', '/dist/'],
+  testPathIgnorePatterns: ['/node_modules/', '/dist/', '/e2e/'],
   transform: {
     '^.+\\.(ts|tsx)$': ['ts-jest', {
       tsconfig: {

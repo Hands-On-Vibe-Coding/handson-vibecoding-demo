@@ -171,7 +171,7 @@ jobs:
           path: frontend/dist/
 
       - name: E2E 테스트 실행
-        run: npm run frontend:test:e2e
+        run: npm run test:e2e
         working-directory: frontend
 
       - name: 테스트 실패 시 스크린샷 저장
