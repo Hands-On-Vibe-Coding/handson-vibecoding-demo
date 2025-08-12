@@ -1,0 +1,205 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  NODE_VERSION: '22.x'
+
+jobs:
+  # 변경사항 감지 및 경로 필터링
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      backend: ${{ steps.filter.outputs.backend }}
+      shared: ${{ steps.filter.outputs.shared }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - 'frontend/**'
+              - 'shared/**'
+              - 'package.json'
+              - '.github/workflows/**'
+            backend:
+              - 'backend/**'
+              - 'shared/**'
+              - 'package.json'
+              - '.github/workflows/**'
+            shared:
+              - 'shared/**'
+              - 'package.json'
+
+  # Shared 모듈 빌드 및 테스트
+  shared:
+    needs: changes
+    if: needs.changes.outputs.shared == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 코드
+        uses: actions/checkout@v4
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 의존성 설치
+        run: npm ci
+
+      - name: Shared 모듈 빌드
+        run: npm run shared:build
+
+      - name: Shared 모듈 테스트
+        run: npm run shared:test
+
+      - name: Shared 모듈 린트 검사
+        run: npm run shared:lint
+
+  # 프론트엔드 빌드, 테스트, 린트
+  frontend:
+    needs: [changes, shared]
+    if: always() && needs.changes.outputs.frontend == 'true' && (needs.shared.result == 'success' || needs.shared.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 코드
+        uses: actions/checkout@v4
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 의존성 설치
+        run: npm ci
+
+      - name: Shared 모듈 빌드 (필요시)
+        run: npm run shared:build
+
+      - name: 프론트엔드 린트 검사
+        run: npm run frontend:lint
+
+      - name: 프론트엔드 테스트
+        run: npm run frontend:test
+
+      - name: 프론트엔드 빌드
+        run: npm run frontend:build
+
+      - name: 빌드 아티팩트 저장
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist/
+          retention-days: 7
+
+  # 백엔드 빌드, 테스트, 린트
+  backend:
+    needs: [changes, shared]
+    if: always() && needs.changes.outputs.backend == 'true' && (needs.shared.result == 'success' || needs.shared.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 코드
+        uses: actions/checkout@v4
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 의존성 설치
+        run: npm ci
+
+      - name: Shared 모듈 빌드 (필요시)
+        run: npm run shared:build
+
+      - name: 백엔드 린트 검사
+        run: npm run backend:lint
+
+      - name: 백엔드 테스트 (커버리지 포함)
+        run: npm run backend:test -- --coverage
+
+      - name: 백엔드 빌드
+        run: npm run backend:build
+
+      - name: CDK 합성 검증
+        run: npm run cdk:synth
+        working-directory: backend
+
+      - name: 테스트 커버리지 업로드
+        uses: codecov/codecov-action@v4
+        with:
+          directory: ./backend/coverage/
+          flags: backend
+          name: backend-coverage
+        continue-on-error: true
+
+  # E2E 테스트 (프론트엔드 빌드 완료 후)
+  e2e-tests:
+    needs: [frontend]
+    if: needs.frontend.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 코드
+        uses: actions/checkout@v4
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 의존성 설치
+        run: npm ci
+
+      - name: Playwright 설치
+        run: npx playwright install --with-deps
+
+      - name: 빌드 아티팩트 다운로드
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist/
+
+      - name: E2E 테스트 실행
+        run: npm run test:e2e
+        working-directory: frontend
+
+      - name: 테스트 실패 시 스크린샷 저장
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-test-results
+          path: frontend/test-results/
+          retention-days: 7
+
+  # 빌드 성공 확인 (모든 작업 완료 후)
+  build-complete:
+    needs: [changes, shared, frontend, backend]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: 빌드 결과 확인
+        run: |
+          echo "=== 빌드 결과 ==="
+          echo "Changes: ${{ needs.changes.result }}"
+          echo "Shared: ${{ needs.shared.result }}"
+          echo "Frontend: ${{ needs.frontend.result }}"
+          echo "Backend: ${{ needs.backend.result }}"
+          
+          # 실패한 작업이 있는지 확인
+          if [[ "${{ needs.shared.result }}" == "failure" || "${{ needs.frontend.result }}" == "failure" || "${{ needs.backend.result }}" == "failure" ]]; then
+            echo "❌ 빌드 실패: 하나 이상의 작업이 실패했습니다."
+            exit 1
+          else
+            echo "✅ 빌드 성공: 모든 작업이 완료되었습니다."
+          fi
