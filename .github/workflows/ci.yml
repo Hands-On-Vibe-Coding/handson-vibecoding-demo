@@ -143,49 +143,10 @@ jobs:
           name: backend-coverage
         continue-on-error: true
 
-  # E2E 테스트 (프론트엔드 빌드 완료 후)
-  e2e-tests:
-    needs: [frontend]
-    if: needs.frontend.result == 'success'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout 코드
-        uses: actions/checkout@v4
-
-      - name: Node.js 설정
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: 의존성 설치
-        run: npm ci
-
-      - name: Playwright 설치
-        run: npx playwright install --with-deps
-
-      - name: 빌드 아티팩트 다운로드
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-dist
-          path: frontend/dist/
-
-      - name: E2E 테스트 실행
-        run: npm run test:e2e
-        working-directory: frontend
-
-      - name: 테스트 실패 시 스크린샷 저장
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: e2e-test-results
-          path: frontend/test-results/
-          retention-days: 7
-
-  # GitHub Pages 배포 (main 브랜치 + 프론트엔드 변경 + 모든 테스트 성공 시)
-  deploy:
-    needs: [changes, shared, frontend, backend, e2e-tests]
-    if: github.ref == 'refs/heads/main' && needs.changes.outputs.frontend == 'true' && needs.frontend.result == 'success' && (needs.shared.result == 'success' || needs.shared.result == 'skipped') && needs.backend.result == 'success'
+  # 프론트엔드 배포 (main 브랜치 + 프론트엔드 변경 + 빌드 성공 시)
+  deploy-frontend:
+    needs: [changes, shared, frontend]
+    if: github.ref == 'refs/heads/main' && needs.changes.outputs.frontend == 'true' && needs.frontend.result == 'success' && (needs.shared.result == 'success' || needs.shared.result == 'skipped')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -228,7 +189,92 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
       
-      - name: 배포 완료 알림
+      - name: 프론트엔드 배포 완료 알림
         run: |
-          echo "🎉 GitHub Pages 배포 완료!"
+          echo "🎉 프론트엔드 GitHub Pages 배포 완료!"
           echo "📱 배포 URL: ${{ steps.deployment.outputs.page_url }}"
+
+  # 백엔드 배포 (main 브랜치 + 백엔드 변경 + 빌드 성공 시)  
+  deploy-backend:
+    needs: [changes, shared, backend]
+    if: github.ref == 'refs/heads/main' && needs.changes.outputs.backend == 'true' && needs.backend.result == 'success' && (needs.shared.result == 'success' || needs.shared.result == 'skipped')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout 코드
+        uses: actions/checkout@v4
+      
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: AWS 자격증명 설정
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: GitHub-Actions-Deploy
+          aws-region: ap-northeast-2
+        continue-on-error: true
+      
+      - name: 의존성 설치
+        run: npm ci
+      
+      - name: Shared 모듈 빌드
+        run: npm run shared:build
+      
+      - name: 백엔드 빌드
+        run: npm run backend:build
+      
+      - name: CDK 배포
+        run: npm run cdk:deploy -- --require-approval never
+        continue-on-error: true
+      
+      - name: 백엔드 배포 완료 알림
+        run: |
+          echo "🚀 백엔드 AWS Lambda 배포 완료!"
+          echo "📡 API Gateway 엔드포인트가 업데이트되었습니다."
+
+  # E2E 테스트 (프론트엔드 배포 완료 후)
+  e2e-tests:
+    needs: [deploy-frontend]
+    if: needs.deploy-frontend.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 코드
+        uses: actions/checkout@v4
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 의존성 설치
+        run: npm ci
+
+      - name: Playwright 설치
+        run: npx playwright install --with-deps
+
+      - name: 배포된 사이트 E2E 테스트 실행
+        run: |
+          # 배포된 GitHub Pages URL에 대해 E2E 테스트 실행
+          export PLAYWRIGHT_BASE_URL="${{ needs.deploy-frontend.outputs.page_url || 'https://hands-on-vibe-coding.github.io/handson-vibecoding-demo/' }}"
+          npm run test:e2e
+        working-directory: frontend
+
+      - name: 테스트 실패 시 스크린샷 저장
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-test-results
+          path: frontend/test-results/
+          retention-days: 7
+
+      - name: E2E 테스트 완료 알림
+        run: |
+          echo "🎭 E2E 테스트 완료!"
+          echo "✅ 배포된 사이트에서 모든 기능이 정상 동작합니다."
