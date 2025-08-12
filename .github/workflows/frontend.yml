@@ -1,0 +1,168 @@
+name: Frontend CI/CD
+
+on:
+  workflow_run:
+    workflows: ["Common CI"]
+    types:
+      - completed
+    branches: [ main, develop ]
+
+env:
+  NODE_VERSION: '22.x'
+
+jobs:
+  # 변경사항 확인 및 프론트엔드 빌드 결정
+  check-changes:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    outputs:
+      should-run: ${{ steps.check.outputs.should-run }}
+    steps:
+      - name: Checkout 코드
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 프론트엔드 변경사항 확인
+        id: check
+        uses: dorny/paths-filter@v3
+        with:
+          base: ${{ github.event.workflow_run.head_branch }}~1
+          head: ${{ github.event.workflow_run.head_sha }}
+          filters: |
+            frontend:
+              - 'frontend/**'
+              - 'shared/**'
+              - 'package.json'
+              - '.github/workflows/**'
+        
+      - name: 실행 여부 설정
+        run: echo "should-run=${{ steps.check.outputs.frontend }}" >> $GITHUB_OUTPUT
+
+  # 프론트엔드 빌드, 테스트, 린트
+  frontend:
+    needs: check-changes
+    if: fromJSON(needs.check-changes.outputs.should-run)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 코드
+        uses: actions/checkout@v4
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 의존성 설치
+        run: npm ci
+
+      - name: Shared 모듈 빌드
+        run: npm run shared:build
+
+      - name: 프론트엔드 린트 검사
+        run: npm run frontend:lint
+
+      - name: 프론트엔드 테스트
+        run: npm run frontend:test
+
+      - name: 프론트엔드 빌드
+        run: npm run frontend:build
+
+      - name: 빌드 아티팩트 저장
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist/
+          retention-days: 7
+
+  # 프론트엔드 배포 (main 브랜치만)
+  deploy-frontend:
+    needs: [check-changes, frontend]
+    if: ${{ github.ref_name == 'main' && fromJSON(needs.check-changes.outputs.should-run) && needs.frontend.result == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: "pages"
+      cancel-in-progress: false
+    steps:
+      - name: Checkout 코드
+        uses: actions/checkout@v4
+      
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: 의존성 설치
+        run: npm ci
+      
+      - name: Shared 모듈 빌드
+        run: npm run shared:build
+      
+      - name: 프론트엔드 빌드 (배포용)
+        run: npm run frontend:build
+      
+      - name: GitHub Pages 설정
+        uses: actions/configure-pages@v4
+      
+      - name: 빌드 결과물 업로드
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './frontend/dist'
+      
+      - name: GitHub Pages에 배포
+        id: deployment
+        uses: actions/deploy-pages@v4
+      
+      - name: 프론트엔드 배포 완료 알림
+        run: |
+          echo "🎉 프론트엔드 GitHub Pages 배포 완료!"
+          echo "📱 배포 URL: ${{ steps.deployment.outputs.page_url }}"
+
+  # E2E 테스트 (프론트엔드 배포 완료 후)
+  e2e-tests:
+    needs: [deploy-frontend]
+    if: needs.deploy-frontend.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 코드
+        uses: actions/checkout@v4
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 의존성 설치
+        run: npm ci
+
+      - name: Playwright 설치
+        run: npx playwright install --with-deps
+
+      - name: 배포된 사이트 E2E 테스트 실행
+        run: |
+          export PLAYWRIGHT_BASE_URL="${{ needs.deploy-frontend.outputs.page_url || 'https://hands-on-vibe-coding.github.io/handson-vibecoding-demo/' }}"
+          npm run test:e2e
+        working-directory: frontend
+
+      - name: 테스트 실패 시 스크린샷 저장
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-test-results
+          path: frontend/test-results/
+          retention-days: 7
+
+      - name: E2E 테스트 완료 알림
+        run: |
+          echo "🎭 E2E 테스트 완료!"
+          echo "✅ 배포된 사이트에서 모든 기능이 정상 동작합니다."

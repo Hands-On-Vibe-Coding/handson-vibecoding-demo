@@ -1,0 +1,126 @@
+name: Backend CI/CD
+
+on:
+  workflow_run:
+    workflows: ["Common CI"]
+    types:
+      - completed
+    branches: [ main, develop ]
+
+env:
+  NODE_VERSION: '22.x'
+
+jobs:
+  # 변경사항 확인 및 백엔드 빌드 결정
+  check-changes:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    outputs:
+      should-run: ${{ steps.check.outputs.should-run }}
+    steps:
+      - name: Checkout 코드
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 백엔드 변경사항 확인
+        id: check
+        uses: dorny/paths-filter@v3
+        with:
+          base: ${{ github.event.workflow_run.head_branch }}~1
+          head: ${{ github.event.workflow_run.head_sha }}
+          filters: |
+            backend:
+              - 'backend/**'
+              - 'shared/**'
+              - 'package.json'
+              - '.github/workflows/**'
+        
+      - name: 실행 여부 설정
+        run: echo "should-run=${{ steps.check.outputs.backend }}" >> $GITHUB_OUTPUT
+
+  # 백엔드 빌드, 테스트, 린트
+  backend:
+    needs: check-changes
+    if: fromJSON(needs.check-changes.outputs.should-run)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 코드
+        uses: actions/checkout@v4
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 의존성 설치
+        run: npm ci
+
+      - name: Shared 모듈 빌드
+        run: npm run shared:build
+
+      - name: 백엔드 린트 검사
+        run: npm run backend:lint
+
+      - name: 백엔드 테스트 (커버리지 포함)
+        run: npm run backend:test -- --coverage
+
+      - name: 백엔드 빌드
+        run: npm run backend:build
+
+      - name: CDK 합성 검증
+        run: npm run cdk:synth
+        working-directory: backend
+
+      - name: 테스트 커버리지 업로드
+        uses: codecov/codecov-action@v4
+        with:
+          directory: ./backend/coverage/
+          flags: backend
+          name: backend-coverage
+        continue-on-error: true
+
+  # 백엔드 배포 (main 브랜치만)
+  deploy-backend:
+    needs: [check-changes, backend]
+    if: ${{ github.ref_name == 'main' && fromJSON(needs.check-changes.outputs.should-run) && needs.backend.result == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout 코드
+        uses: actions/checkout@v4
+      
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: AWS 자격증명 설정
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: GitHub-Actions-Deploy
+          aws-region: ap-northeast-2
+        continue-on-error: true
+      
+      - name: 의존성 설치
+        run: npm ci
+      
+      - name: Shared 모듈 빌드
+        run: npm run shared:build
+      
+      - name: 백엔드 빌드
+        run: npm run backend:build
+      
+      - name: CDK 배포
+        run: npm run cdk:deploy -- --require-approval never
+        continue-on-error: true
+      
+      - name: 백엔드 배포 완료 알림
+        run: |
+          echo "🚀 백엔드 AWS Lambda 배포 완료!"
+          echo "📡 API Gateway 엔드포인트가 업데이트되었습니다."

@@ -1,0 +1,71 @@
+name: Common CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  NODE_VERSION: '22.x'
+
+jobs:
+  # 변경사항 감지 및 경로 필터링
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      backend: ${{ steps.filter.outputs.backend }}
+      shared: ${{ steps.filter.outputs.shared }}
+    steps:
+      - name: Checkout 코드
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: 변경사항 감지
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          base: ${{ github.event.repository.default_branch }}
+          filters: |
+            frontend:
+              - 'frontend/**'
+              - 'shared/**'
+              - 'package.json'
+              - '.github/workflows/**'
+            backend:
+              - 'backend/**'
+              - 'shared/**'
+              - 'package.json'
+              - '.github/workflows/**'
+            shared:
+              - 'shared/**'
+              - 'package.json'
+
+  # Shared 모듈 빌드 및 테스트
+  shared:
+    needs: changes
+    if: fromJSON(needs.changes.outputs.shared)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 코드
+        uses: actions/checkout@v4
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 의존성 설치
+        run: npm ci
+
+      - name: Shared 모듈 빌드
+        run: npm run shared:build
+
+      - name: Shared 모듈 테스트
+        run: npm run shared:test
+
+      - name: Shared 모듈 린트 검사
+        run: npm run shared:lint
