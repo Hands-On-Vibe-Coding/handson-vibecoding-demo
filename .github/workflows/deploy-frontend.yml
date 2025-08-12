@@ -1,10 +1,12 @@
-# 이 워크플로우는 ci.yml에 통합되었습니다.
-# CI/CD 파이프라인에서 테스트 통과 후 자동 배포됩니다.
-
-name: 프론트엔드 배포 (비활성화됨)
+name: 프론트엔드 GitHub Pages 배포
 
 on:
-  # 트리거 비활성화 - ci.yml에서 통합 관리
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'frontend/**'
+      - 'shared/**'
+      - '.github/workflows/deploy-frontend.yml'
   workflow_dispatch:
 
 permissions:
