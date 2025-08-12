@@ -218,7 +218,7 @@ jobs:
   # GitHub Pages 배포 (CI 성공 시에만)
   deploy-frontend:
     needs: [build-complete, frontend]
-    if: needs.build-complete.outputs.should-deploy == 'true' && needs.frontend.result == 'success'
+    if: needs.build-complete.outputs.should-deploy == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -228,6 +228,13 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: 배포 조건 디버깅
+        run: |
+          echo "🔍 배포 조건 확인"
+          echo "should-deploy: ${{ needs.build-complete.outputs.should-deploy }}"
+          echo "frontend result: ${{ needs.frontend.result }}"
+          echo "build-complete result: ${{ needs.build-complete.result }}"
+          
       - name: Checkout 코드
         uses: actions/checkout@v4
       
