@@ -182,30 +182,53 @@ jobs:
           path: frontend/test-results/
           retention-days: 7
 
-  # 빌드 성공 확인 (모든 작업 완료 후)
-  build-complete:
-    needs: [changes, shared, frontend, backend]
-    if: always()
+  # GitHub Pages 배포 (main 브랜치 + 프론트엔드 변경 + 모든 테스트 성공 시)
+  deploy:
+    needs: [changes, shared, frontend, backend, e2e-tests]
+    if: github.ref == 'refs/heads/main' && needs.changes.outputs.frontend == 'true' && needs.frontend.result == 'success' && (needs.shared.result == 'success' || needs.shared.result == 'skipped') && needs.backend.result == 'success'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: "pages"
+      cancel-in-progress: false
     steps:
-      - name: 빌드 결과 확인
-        id: check
+      - name: Checkout 코드
+        uses: actions/checkout@v4
+      
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: 의존성 설치
+        run: npm ci
+      
+      - name: Shared 모듈 빌드
+        run: npm run shared:build
+      
+      - name: 프론트엔드 빌드 (배포용)
+        run: npm run frontend:build
+      
+      - name: GitHub Pages 설정
+        uses: actions/configure-pages@v4
+      
+      - name: 빌드 결과물 업로드
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './frontend/dist'
+      
+      - name: GitHub Pages에 배포
+        id: deployment
+        uses: actions/deploy-pages@v4
+      
+      - name: 배포 완료 알림
         run: |
-          echo "=== 빌드 결과 ==="
-          echo "Changes: ${{ needs.changes.result }}"
-          echo "Shared: ${{ needs.shared.result }}"
-          echo "Frontend: ${{ needs.frontend.result }}"
-          echo "Backend: ${{ needs.backend.result }}"
-          
-          # 실패한 작업이 있는지 확인
-          if [[ "${{ needs.shared.result }}" == "failure" || "${{ needs.frontend.result }}" == "failure" || "${{ needs.backend.result }}" == "failure" ]]; then
-            echo "❌ 빌드 실패: 하나 이상의 작업이 실패했습니다."
-            echo "should-deploy=false" >> $GITHUB_OUTPUT
-            exit 1
-          else
-            echo "✅ 빌드 성공: 모든 작업이 완료되었습니다."
-            # main 브랜치이고 프론트엔드 변경사항이 있으면 배포 알림
-            if [[ "${{ github.ref }}" == "refs/heads/main" && "${{ needs.changes.outputs.frontend }}" == "true" ]]; then
-              echo "🚀 프론트엔드 변경사항 감지 - GitHub Pages 자동 배포 트리거됨"
-            fi
-          fi
+          echo "🎉 GitHub Pages 배포 완료!"
+          echo "📱 배포 URL: ${{ steps.deployment.outputs.page_url }}"

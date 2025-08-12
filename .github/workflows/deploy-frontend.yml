@@ -1,10 +1,8 @@
-name: 프론트엔드 GitHub Pages 배포
+# 이 워크플로우는 ci.yml의 deploy 작업에 통합되었습니다.
+name: 프론트엔드 GitHub Pages 배포 (비활성화됨)
 
 on:
-  workflow_run:
-    workflows: ["CI/CD Pipeline"]
-    types: [completed]
-    branches: [main]
+  # 트리거 비활성화 - ci.yml에 통합됨
   workflow_dispatch:
 
 permissions:

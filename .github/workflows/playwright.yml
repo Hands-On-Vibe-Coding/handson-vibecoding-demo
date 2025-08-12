@@ -1,9 +1,8 @@
-name: Playwright Tests
+# 이 워크플로우는 ci.yml의 e2e-tests 작업에 통합되었습니다.
+name: Playwright Tests (비활성화됨)
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  # 트리거 비활성화 - ci.yml에 통합됨
+  workflow_dispatch:
 jobs:
   test:
     timeout-minutes: 60
