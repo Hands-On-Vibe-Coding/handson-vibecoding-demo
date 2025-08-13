@@ -21,14 +21,14 @@ jobs:
       - name: Checkout 코드
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
 
       - name: 백엔드 변경사항 확인
         id: check
         uses: dorny/paths-filter@v3
         with:
-          base: ${{ github.event.workflow_run.head_branch }}~1
-          head: ${{ github.event.workflow_run.head_sha }}
+          base: ${{ github.event.workflow_run.head_sha }}~1
           filters: |
             backend:
               - 'backend/**'
@@ -84,7 +84,7 @@ jobs:
   # 백엔드 배포 (main 브랜치만)
   deploy-backend:
     needs: [check-changes, backend]
-    if: ${{ github.ref_name == 'main' && fromJSON(needs.check-changes.outputs.should-run) && needs.backend.result == 'success' }}
+    if: ${{ github.event.workflow_run.head_branch == 'main' && fromJSON(needs.check-changes.outputs.should-run) && needs.backend.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
