@@ -82,6 +82,8 @@ jobs:
     needs: [check-changes, frontend]
     if: ${{ github.event.workflow_run.head_branch == 'main' && fromJSON(needs.check-changes.outputs.should-run) && needs.frontend.result == 'success' }}
     runs-on: ubuntu-latest
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
     permissions:
       contents: read
       pages: write
@@ -149,9 +151,31 @@ jobs:
       - name: Playwright 설치
         run: npx playwright install --with-deps
 
+      - name: 배포된 사이트 접근성 확인
+        run: |
+          SITE_URL="${{ needs.deploy-frontend.outputs.page_url || 'https://hands-on-vibe-coding.github.io/handson-vibecoding-demo/' }}"
+          echo "🌐 배포된 사이트 URL: $SITE_URL"
+          
+          # 사이트 접근성 확인 (최대 5분 대기)
+          for i in {1..30}; do
+            if curl -s -o /dev/null -w "%{http_code}" "$SITE_URL" | grep -q "200"; then
+              echo "✅ 사이트 접근 가능 (시도 $i/30)"
+              break
+            else
+              echo "⏳ 사이트 접근 대기 중... (시도 $i/30)"
+              sleep 10
+            fi
+            
+            if [ $i -eq 30 ]; then
+              echo "❌ 사이트 접근 실패 - E2E 테스트를 중단합니다"
+              exit 1
+            fi
+          done
+
       - name: 배포된 사이트 E2E 테스트 실행
         run: |
           export PLAYWRIGHT_BASE_URL="${{ needs.deploy-frontend.outputs.page_url || 'https://hands-on-vibe-coding.github.io/handson-vibecoding-demo/' }}"
+          echo "🎭 E2E 테스트 시작 - 테스트 대상: $PLAYWRIGHT_BASE_URL"
           npm run test:e2e
         working-directory: frontend
 

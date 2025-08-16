@@ -28,8 +28,21 @@ npm run frontend:test
 # Test (single file - run from frontend/ directory)
 cd frontend && npm test -- ComponentName.test.tsx
 
-# E2E Tests with Playwright (requires dev server running)
-cd frontend && npx playwright test
+# E2E Tests with Playwright
+# 로컬 개발 서버 대상 (자동으로 서버 시작)
+npm run test:e2e:local
+
+# 리모트 사이트 대상 (PLAYWRIGHT_BASE_URL 환경변수 필요)
+PLAYWRIGHT_BASE_URL=https://example.com npm run test:e2e:remote
+
+# 브라우저 창 표시하며 테스트 (디버깅용)
+npm run test:e2e:headed
+
+# 스텝별 디버깅 모드
+npm run test:e2e:debug
+
+# 기본 E2E 테스트 (환경변수에 따라 로컬/리모트 자동 결정)
+npm run test:e2e
 
 # Lint (with auto-fix)
 npm run frontend:lint

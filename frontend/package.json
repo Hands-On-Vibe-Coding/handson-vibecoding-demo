@@ -9,6 +9,10 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "test": "jest --passWithNoTests",
     "test:e2e": "playwright test",
+    "test:e2e:local": "PLAYWRIGHT_BASE_URL=http://localhost:5173 playwright test",
+    "test:e2e:remote": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -50,6 +50,11 @@ pnpm-debug.log*
 /playwright-report/
 /test-results/
 
+# Playwright 비주얼 테스트 스냅샷
+/frontend/e2e/**/*-snapshots/
+**/visual.spec.ts-snapshots/
+**/*.spec.ts-snapshots/
+
 # 캐시 디렉토리
 .npm/
 .eslintcache

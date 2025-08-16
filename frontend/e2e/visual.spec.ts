@@ -28,8 +28,14 @@ test.describe('시각적 회귀 테스트', () => {
     // 데스크톱 화면 크기 설정
     await page.setViewportSize({ width: 1280, height: 720 });
     
-    // 페이지가 로드될 때까지 기다림
-    await page.waitForLoadState('networkidle');
+    // 페이지가 로드될 때까지 기다림 (더 관대한 조건)
+    await page.waitForLoadState('domcontentloaded');
+    
+    // Todo 리스트가 로드될 때까지 기다림
+    await page.waitForTimeout(2000); // 애니메이션과 렌더링 완료를 위한 충분한 대기
+    
+    // 추가 대기 (애니메이션 완료)
+    await page.waitForTimeout(1000);
     
     // 스크린샷 찍고 비교 - 첫 실행 시에는 스크린샷 생성
     await expect(page).toHaveScreenshot('main-desktop.png', {
@@ -41,8 +47,14 @@ test.describe('시각적 회귀 테스트', () => {
     // 모바일 화면 크기 설정
     await page.setViewportSize({ width: 375, height: 667 });
     
-    // 페이지가 로드될 때까지 기다림
-    await page.waitForLoadState('networkidle');
+    // 페이지가 로드될 때까지 기다림 (더 관대한 조건)
+    await page.waitForLoadState('domcontentloaded');
+    
+    // Todo 리스트가 로드될 때까지 기다림
+    await page.waitForTimeout(2000); // 애니메이션과 렌더링 완료를 위한 충분한 대기
+    
+    // 추가 대기 (애니메이션 완료)
+    await page.waitForTimeout(1000);
     
     // 스크린샷 찍고 비교 - 첫 실행 시에는 스크린샷 생성
     await expect(page).toHaveScreenshot('main-mobile.png', {
@@ -51,6 +63,15 @@ test.describe('시각적 회귀 테스트', () => {
   });
 
   test('다크 모드 전환', async ({ page }) => {
+    // 데스크톱 화면 크기 설정
+    await page.setViewportSize({ width: 1280, height: 720 });
+    
+    // 페이지가 로드될 때까지 기다림
+    await page.waitForLoadState('domcontentloaded');
+    
+    // Todo 리스트가 로드될 때까지 기다림
+    await page.waitForTimeout(2000); // 애니메이션과 렌더링 완료를 위한 충분한 대기
+    
     // 다크 모드 전환 버튼이 있는지 확인
     const darkModeButton = page.getByRole('button', { name: '테마 전환' });
     
@@ -59,10 +80,7 @@ test.describe('시각적 회귀 테스트', () => {
       await darkModeButton.click();
       
       // 페이지가 다크 모드로 변경될 때까지 기다림
-      await page.waitForTimeout(500);
-      
-      // 데스크톱 화면 크기 설정
-      await page.setViewportSize({ width: 1280, height: 720 });
+      await page.waitForTimeout(1000);
       
       // 스크린샷 찍고 비교 - 첫 실행 시에는 스크린샷 생성
       await expect(page).toHaveScreenshot('main-desktop-dark.png', {

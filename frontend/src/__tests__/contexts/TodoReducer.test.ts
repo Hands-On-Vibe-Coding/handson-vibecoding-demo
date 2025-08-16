@@ -209,9 +209,9 @@ describe('todoReducer', () => {
 
   it('알 수 없는 액션 타입에 대해서는 상태를 변경하지 않는다', () => {
     const action = {
-      type: 'UNKNOWN_ACTION' as any,
+      type: 'UNKNOWN_ACTION' as never,
       payload: {}
-    };
+    } as TodoAction;
     
     const newState = todoReducer(initialState, action);
     
