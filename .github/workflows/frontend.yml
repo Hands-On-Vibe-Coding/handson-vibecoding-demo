@@ -176,8 +176,28 @@ jobs:
         run: |
           export PLAYWRIGHT_BASE_URL="${{ needs.deploy-frontend.outputs.page_url || 'https://hands-on-vibe-coding.github.io/handson-vibecoding-demo/' }}"
           echo "🎭 E2E 테스트 시작 - 테스트 대상: $PLAYWRIGHT_BASE_URL"
-          npm run test:e2e
+          
+          # Linux 스냅샷이 없는 경우 생성 (첫 실행 또는 스냅샷 업데이트 필요시)
+          if ! ls e2e/visual.spec.ts-snapshots/*-linux.png 2>/dev/null | head -1 > /dev/null; then
+            echo "📸 Linux 환경용 스냅샷이 없습니다. 새로 생성합니다..."
+            npx playwright test --update-snapshots
+            
+            # 생성된 스냅샷을 아티팩트로 저장
+            echo "💾 생성된 스냅샷을 아티팩트로 저장합니다..."
+          else
+            echo "🔍 기존 스냅샷과 비교하여 테스트 실행..."
+            npm run test:e2e
+          fi
         working-directory: frontend
+
+      - name: Linux 스냅샷 저장 (생성된 경우)
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: linux-snapshots
+          path: frontend/e2e/visual.spec.ts-snapshots/*-linux.png
+          if-no-files-found: ignore
+          retention-days: 30
 
       - name: 테스트 실패 시 스크린샷 저장
         uses: actions/upload-artifact@v4

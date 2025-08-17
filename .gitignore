@@ -56,6 +56,11 @@ pnpm-debug.log*
 **/*.spec.ts-snapshots/
 .playwright-mcp/
 
+# GitHub Actions 아티팩트
+e2e-test-results/
+frontend-dist/
+github-pages/
+
 # 캐시 디렉토리
 .npm/
 .eslintcache
