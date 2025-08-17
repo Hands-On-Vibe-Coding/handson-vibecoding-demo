@@ -8,6 +8,7 @@ import { AuthStack } from '../auth/auth-stack';
 export class LambdaStack extends cdk.Stack {
   public readonly todoLambda: lambda.Function;
   public readonly userLambda: lambda.Function;
+  public readonly lambdaFunctions: lambda.Function[];
 
   constructor(
     scope: Construct,
@@ -69,6 +70,9 @@ export class LambdaStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(30),
       memorySize: 256,
     });
+
+    // Lambda 함수 배열 초기화 (모니터링을 위해)
+    this.lambdaFunctions = [this.todoLambda, this.userLambda];
 
     // 스택 출력값 설정
     new cdk.CfnOutput(this, 'TodoLambdaFunctionName', {

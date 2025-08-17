@@ -145,7 +145,53 @@ const logFormat = {
 
 ## 4. 대시보드
 
-### 4.1 운영 대시보드
+### 4.1 CloudWatch Dashboard 구현 (CDK)
+AWS CDK를 사용하여 CloudWatch Dashboard를 구현하였습니다.
+
+#### MonitoringStack 구성 요소
+- **Lambda 함수 모니터링**: 호출 횟수, 오류율, 실행 시간, 동시 실행 수, 스로틀링, 성공률
+- **API Gateway 모니터링**: 요청 수, 응답 시간 (평균/최소/최대/P99), HTTP 상태 코드, 캐시 히트율
+- **DynamoDB 모니터링**: 읽기/쓰기 용량 사용률, 스로틀링, 시스템 오류, 사용자 오류, 응답 시간
+- **통합 시스템 상태**: 전체 시스템의 오류 현황 및 상태 요약
+
+#### 구현된 위젯 목록
+1. **Lambda 메트릭 위젯**
+   - 호출 횟수 그래프
+   - 오류율 시계열 차트
+   - 평균 실행 시간 추적
+   - 동시 실행 수 모니터링
+   - 스로틀링 이벤트
+   - 성공률 계산 (MathExpression 사용)
+
+2. **API Gateway 메트릭 위젯**
+   - API 요청 수 추적
+   - 응답 시간 분포 (평균, 최소, 최대, P99)
+   - HTTP 상태 코드별 분류 (4xx, 5xx)
+   - 캐시 히트/미스 통계
+
+3. **DynamoDB 메트릭 위젯**
+   - 읽기/쓰기 용량 사용률
+   - 스로틀링 이벤트 추적
+   - 시스템 오류 모니터링
+   - 사용자 오류 추적
+   - 작업별 응답 시간 (GetItem, PutItem, Query, Scan)
+
+#### 배포 방법
+```bash
+# CloudWatch Dashboard를 포함한 모든 스택 배포
+cd backend
+npx cdk deploy TodoAppMonitoringStack
+
+# 또는 모든 스택 한번에 배포
+npx cdk deploy --all
+```
+
+#### 대시보드 접근 방법
+1. AWS Console에서 CloudWatch 서비스로 이동
+2. 왼쪽 메뉴에서 "Dashboards" 선택
+3. "TodoAppDashboard" 클릭하여 접근
+
+### 4.2 운영 대시보드
 ```typescript
 const operationalDashboard = {
   widgets: [

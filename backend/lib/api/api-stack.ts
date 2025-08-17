@@ -6,6 +6,7 @@ import { AuthStack } from '../auth/auth-stack';
 
 export class ApiStack extends cdk.Stack {
   public readonly api: apigateway.RestApi;
+  public readonly restApi: apigateway.RestApi;
 
   constructor(
     scope: Construct,
@@ -38,6 +39,9 @@ export class ApiStack extends cdk.Stack {
         ],
       },
     });
+
+    // restApi는 api와 동일한 참조를 가리킴 (MonitoringStack 호환성을 위해)
+    this.restApi = this.api;
 
     // Todo API 리소스 생성
     const todoResource = this.api.root.addResource('todos');
