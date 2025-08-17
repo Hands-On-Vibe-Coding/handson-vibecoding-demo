@@ -1,0 +1,2 @@
+This is a dummy file to test frontend workflow.
+Created for testing CI/CD pipeline.
