@@ -10,10 +10,11 @@ const devTools = {
     'ESLint',
     'Prettier',
     'AWS Toolkit',
-    'Docker',
+    'TypeScript',
+    'Jest',
   ],
-  nodeVersion: '18.x',
-  packageManager: 'pnpm',
+  nodeVersion: '22.x',
+  packageManager: 'npm',
 };
 ```
 
@@ -51,7 +52,8 @@ const componentDevelopment = {
     'TodoStats',
   ],
   testing: {
-    framework: 'Vitest',
+    framework: 'Jest + React Testing Library',
+    e2e: 'Playwright',
     coverage: 80,
   },
 };
@@ -185,8 +187,9 @@ const unitTests = {
     lines: 80,
   },
   frameworks: {
-    frontend: 'Vitest',
+    frontend: 'Jest + React Testing Library',
     backend: 'Jest',
+    e2e: 'Playwright',
   },
 };
 ```

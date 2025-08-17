@@ -50,20 +50,39 @@
 - 로컬 스토리지를 사용한 데이터 저장
 
 ## 3. 기술 스택
-- 프론트엔드: React
-    - UI 라이브러리: Mantine  
-      (모던 디자인, 훅 기반 API, 타입스크립트 완벽 지원, 다크 모드 지원)
-    - 상태 관리: React Context + useReducer
-    - 테스트: Jest, React Testing Library
-- 백엔드: Node.js + TypeScript
-    - AWS 서버리스 아키텍처
-    - API Gateway: REST API
-    - Lambda: 서버리스 함수
-    - DynamoDB: NoSQL 데이터베이스
-    - Cognito: 인증 및 권한 관리
-    - CDK: TypeScript 기반 인프라 코드
-- 빌드 도구: Vite
-- CI/CD: GitHub Actions
+
+### 3.1 프론트엔드
+- **프레임워크**: React 19.x + TypeScript 5.7.x
+- **빌드 도구**: Vite 6.x (HMR, 빠른 빌드)
+- **UI 라이브러리**: Mantine UI 7.x
+  - 모던 디자인, 훅 기반 API, 타입스크립트 완벽 지원
+  - 다크 모드 지원, 접근성 고려된 컴포넌트
+- **상태 관리**: React Context API + useReducer
+- **테스팅**: 
+  - 단위 테스트: Jest 29.x + React Testing Library 16.x
+  - E2E 테스트: Playwright 1.52.x (크로스 브라우저 지원)
+
+### 3.2 백엔드
+- **런타임**: Node.js 22.x + TypeScript 5.8.x
+- **아키텍처**: Clean Architecture (Domain-Driven Design)
+- **AWS 서버리스**:
+  - API Gateway: REST API 엔드포인트
+  - Lambda: 서버리스 함수 (Node.js 22 런타임)
+  - DynamoDB: NoSQL 데이터베이스
+  - Cognito: 인증 및 권한 관리
+- **인프라**: AWS CDK 2.x (TypeScript 기반 IaC)
+- **테스팅**: Jest 30.x + TDD 방법론
+
+### 3.3 공유 모듈
+- **타입 정의**: 프론트엔드-백엔드 간 공통 타입
+- **유틸리티**: 검증 함수, 상수 관리
+- **빌드**: TypeScript 컴파일러
+
+### 3.4 개발 도구
+- **패키지 관리**: npm workspaces (모노레포)
+- **코드 품질**: ESLint 9.x + Prettier 3.x
+- **Git Hooks**: Husky 8.x (자동 lint, build, test)
+- **배포**: GitHub Pages (프론트엔드), AWS (백엔드)
 
 ## 4. 비기능적 요구사항
 - 성능: 페이지 로드 시간 < 2초
