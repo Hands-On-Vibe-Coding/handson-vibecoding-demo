@@ -13,21 +13,23 @@ graph TD
     C --> D[로컬 테스트]
     D --> E[커밋 & 푸시]
     E --> F[Pull Request 생성]
-    F --> G[코드 리뷰]
-    G --> H{리뷰 승인?}
-    H -->|수정 필요| I[코드 수정]
-    H -->|승인| J[PR 병합]
-    I --> E
-    J --> K[CI/CD 파이프라인 실행]
-    K --> L[자동 배포]
-    L --> M[이슈 종료]
+    F --> G[자동화된 PR 리뷰]
+    G --> H[코드 리뷰]
+    H --> I{리뷰 승인?}
+    I -->|수정 필요| J[코드 수정]
+    I -->|승인| K[PR 병합]
+    J --> E
+    K --> L[CI/CD 파이프라인 실행]
+    L --> M[자동 배포]
+    M --> N[이슈 종료]
     
     style A fill:#1976d2,stroke:#0d47a1,stroke-width:2px,color:#fff
     style F fill:#7b1fa2,stroke:#4a148c,stroke-width:2px,color:#fff
-    style G fill:#388e3c,stroke:#1b5e20,stroke-width:2px,color:#fff
-    style K fill:#f57c00,stroke:#e65100,stroke-width:2px,color:#fff
-    style L fill:#0288d1,stroke:#01579b,stroke-width:2px,color:#fff
-    style M fill:#2e7d32,stroke:#1b5e20,stroke-width:2px,color:#fff
+    style G fill:#ff8f00,stroke:#e65100,stroke-width:2px,color:#fff
+    style H fill:#388e3c,stroke:#1b5e20,stroke-width:2px,color:#fff
+    style L fill:#f57c00,stroke:#e65100,stroke-width:2px,color:#fff
+    style M fill:#0288d1,stroke:#01579b,stroke-width:2px,color:#fff
+    style N fill:#2e7d32,stroke:#1b5e20,stroke-width:2px,color:#fff
 ```
 
 ### 0.2 단계별 상세 워크플로우
@@ -605,4 +607,150 @@ npm ci --cache .npm --prefer-offline
 - **인프라 테스트**: CDK 스택 테스트 자동화
 - **성능 테스트**: 자동화된 성능 regression 테스트
 
-이 워크플로우 설계는 모노레포의 복잡성을 관리하면서도 효율적인 CI/CD 파이프라인을 제공합니다.
+## 10. PR 리뷰 자동화 (Claude Code Sub-Agent)
+
+### 10.1 pr-reviewer Sub-Agent 개요
+
+Claude Code의 Task tool을 통해 생성된 전문 PR 리뷰 sub-agent로, GitHub CLI를 활용하여 자동화된 코드 리뷰를 수행합니다.
+
+```mermaid
+graph TD
+    A[PR 생성] --> B[pr-reviewer 활성화]
+    B --> C[GitHub CLI를 통한 PR 분석]
+    C --> D[변경사항 분석]
+    D --> E[코드 품질 검토]
+    E --> F[아키텍처 준수성 확인]
+    F --> G[보안 및 성능 검토]
+    G --> H[테스트 및 문서화 평가]
+    H --> I[종합 리뷰 보고서 생성]
+    I --> J[점수 및 권장사항 제공]
+    
+    style A fill:#1976d2,stroke:#0d47a1,stroke-width:2px,color:#fff
+    style B fill:#ff8f00,stroke:#e65100,stroke-width:2px,color:#fff
+    style C fill:#7b1fa2,stroke:#4a148c,stroke-width:2px,color:#fff
+    style I fill:#388e3c,stroke:#1b5e20,stroke-width:2px,color:#fff
+    style J fill:#2e7d32,stroke:#1b5e20,stroke-width:2px,color:#fff
+```
+
+### 10.2 리뷰 기준 및 체크리스트
+
+#### 코드 품질 평가 (25점)
+
+- **아키텍처 준수**: Clean Architecture 패턴 준수 여부
+- **SOLID 원칙**: 객체지향 설계 원칙 적용 여부
+- **코딩 컨벤션**: 프로젝트 명명 규칙 및 스타일 가이드 준수
+- **코드 복잡도**: 순환 복잡도 및 인지적 복잡도 평가
+
+#### 테스트 커버리지 및 품질 (20점)
+
+- **TDD 준수**: 테스트 우선 개발 원칙 적용 여부
+- **커버리지**: 80% 이상 테스트 커버리지 확인
+- **테스트 품질**: 단위/통합/E2E 테스트의 적절성
+- **테스트 명명**: 테스트 케이스 명명 규칙 준수
+
+#### 보안 이슈 및 모범 사례 (20점)
+
+- **보안 취약점**: OWASP 기준 보안 이슈 검토
+- **인증/인가**: 적절한 권한 관리 구현 여부
+- **데이터 검증**: 입력 데이터 검증 및 sanitization
+- **시크릿 관리**: 민감 정보 노출 방지
+
+#### 성능 영향도 (15점)
+
+- **알고리즘 효율성**: Big-O 복잡도 분석
+- **메모리 사용**: 메모리 누수 및 최적화 여부
+- **데이터베이스**: 쿼리 최적화 및 인덱스 활용
+- **번들 크기**: 프론트엔드 번들 크기 영향도
+
+#### 문서화 완성도 (10점)
+
+- **코드 주석**: 복잡한 로직에 대한 한국어 주석
+- **README 업데이트**: 변경사항 반영 여부
+- **API 문서**: 새로운 엔드포인트 문서화
+- **마이그레이션 가이드**: 브레이킹 체인지 가이드
+
+#### CLAUDE.md 규칙 준수 (10점)
+
+- **한국어 우선 원칙**: 문서 및 커밋 메시지 언어 준수
+- **이슈 연동**: GitHub 이슈 참조 및 연동
+- **브랜치 명명**: 브랜치 명명 규칙 준수
+- **커밋 컨벤션**: 커밋 메시지 형식 준수
+
+### 10.3 자동화된 리뷰 프로세스
+
+```mermaid
+sequenceDiagram
+    participant Dev as Developer
+    participant GH as GitHub
+    participant Agent as pr-reviewer Agent
+    participant CLI as GitHub CLI
+    participant Report as Review Report
+    
+    Dev->>GH: PR 생성
+    Dev->>Agent: pr-reviewer 명령 실행
+    Agent->>CLI: gh pr view <PR번호>
+    CLI->>Agent: PR 메타데이터 반환
+    Agent->>CLI: gh pr diff <PR번호>
+    CLI->>Agent: 변경사항 분석
+    Agent->>Agent: 코드 품질 분석
+    Agent->>Agent: 아키텍처 준수성 검토
+    Agent->>Agent: 보안 및 성능 평가
+    Agent->>Report: 종합 리뷰 보고서 생성
+    Report->>Dev: 점수 및 개선사항 제공
+```
+
+### 10.4 사용법 및 명령어
+
+#### 기본 사용법
+
+```bash
+# Claude Code에서 PR 리뷰 실행
+pr-reviewer #<PR번호>에 대해서 리뷰를 진행해줘.
+
+# 예시
+pr-reviewer #13번 pr에 대해서 리뷰를 진행해줘.
+```
+
+#### 리뷰 결과 예시
+
+```text
+## PR #13 종합 코드 리뷰 결과
+
+### 📊 종합 평가: 95/100점 ⭐⭐⭐⭐⭐
+
+| 평가 영역 | 점수 | 비고 |
+|-----------|------|------|
+| 코드 품질 | 23/25 | Clean Architecture 잘 준수 |
+| 테스트 커버리지 | 20/20 | 100% 커버리지 달성 |
+| 보안 | 19/20 | 입력 검증 강화 필요 |
+| 성능 | 15/15 | 최적화된 구현 |
+| 문서화 | 10/10 | 완벽한 문서화 |
+| 규칙 준수 | 8/10 | 커밋 메시지 개선 필요 |
+
+### 🎯 주요 강점
+- ✅ 체계적인 아키텍처 설계
+- ✅ 포괄적인 테스트 커버리지
+- ✅ 명확한 문서화
+
+### 🔧 개선 제안
+- 📝 입력 데이터 검증 로직 강화
+- 💬 커밋 메시지 형식 통일
+
+### 권장 조치: ✅ 승인 권장
+```
+
+### 10.5 리뷰 품질 향상 전략
+
+#### 지속적 개선
+
+- **패턴 학습**: 성공한 PR의 패턴 분석 및 적용
+- **피드백 수집**: 개발자 피드백을 통한 리뷰 기준 개선
+- **자동화 확장**: CI/CD 파이프라인과 통합하여 자동 리뷰 실행
+
+#### 팀 협업 강화
+
+- **리뷰 표준화**: 일관된 리뷰 기준으로 코드 품질 향상
+- **학습 기회**: 리뷰 결과를 통한 팀 전체 역량 향상
+- **프로세스 최적화**: 리뷰 시간 단축 및 효율성 증대
+
+이 워크플로우 설계는 모노레포의 복잡성을 관리하면서도 효율적인 CI/CD 파이프라인을 제공하며, 자동화된 PR 리뷰를 통해 코드 품질을 지속적으로 향상시킵니다.
