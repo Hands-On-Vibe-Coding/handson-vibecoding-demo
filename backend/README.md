@@ -73,8 +73,9 @@ backend/
 │   │   └── auth-stack.ts          # Cognito 스택
 │   ├── database/
 │   │   └── database-stack.ts      # DynamoDB 스택
-│   └── lambda/
-│       └── lambda-stack.ts        # Lambda 함수 스택
+│   ├── lambda/
+│   │   └── lambda-stack.ts        # Lambda 함수 스택
+│   └── monitoring-stack.ts        # CloudWatch Dashboard 스택
 └── test/                          # 테스트 (src 구조 미러링)
     ├── domain/
     ├── application/
@@ -293,8 +294,32 @@ Table: TodoApp
 - **운영**: `cdk deploy --profile prod`
 
 ### 모니터링
+
+#### CloudWatch Dashboard (MonitoringStack)
+AWS CDK로 구현된 통합 모니터링 대시보드를 제공합니다.
+
+**모니터링 대상**:
+- **Lambda Functions**: 호출 횟수, 오류율, 실행 시간, 동시 실행 수, 스로틀링, 성공률
+- **API Gateway**: 요청 수, 응답 시간 (평균/최소/최대/P99), HTTP 상태 코드, 캐시 통계
+- **DynamoDB**: 읽기/쓰기 용량, 스로틀링, 시스템/사용자 오류, 작업별 응답 시간
+- **통합 시스템 상태**: 전체 시스템 오류 현황 및 상태 요약
+
+**대시보드 배포**:
+```bash
+# MonitoringStack 배포
+npx cdk deploy TodoAppMonitoringStack
+
+# 모든 스택 한번에 배포
+npx cdk deploy --all
+```
+
+**대시보드 접근**:
+1. AWS Console → CloudWatch → Dashboards
+2. "TodoAppDashboard" 선택
+
+**추가 모니터링 도구**:
 - **CloudWatch Logs**: Lambda 함수 로그
-- **CloudWatch Metrics**: API Gateway, Lambda 메트릭
+- **CloudWatch Metrics**: 실시간 메트릭 조회
 - **X-Ray**: 분산 트레이싱 (옵션)
 
 ### 보안
