@@ -77,3 +77,6 @@ github-pages/
 .npmrc
 .yarnrc
 .vscode
+
+# Claude Code 설정 파일
+.claude/agents/
