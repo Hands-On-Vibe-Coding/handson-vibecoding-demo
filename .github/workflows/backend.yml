@@ -103,10 +103,9 @@ jobs:
       - name: AWS 자격증명 설정
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          role-session-name: GitHub-Actions-Deploy
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-2
-        continue-on-error: true
       
       - name: 의존성 설치
         run: npm ci
@@ -119,7 +118,7 @@ jobs:
       
       - name: CDK 배포
         run: npm run cdk:deploy -- --require-approval never
-        continue-on-error: true
+        working-directory: backend
       
       - name: 백엔드 배포 완료 알림
         run: |
