@@ -54,6 +54,7 @@ pnpm-debug.log*
 /frontend/e2e/**/*-snapshots/
 **/visual.spec.ts-snapshots/
 **/*.spec.ts-snapshots/
+.playwright-mcp/
 
 # 캐시 디렉토리
 .npm/
