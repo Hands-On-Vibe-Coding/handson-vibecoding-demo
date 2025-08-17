@@ -581,6 +581,86 @@ The project also incorporates Windsurf development rules from `global_windsurf_r
 - Token efficiency without sacrificing clarity
 - Mandatory approval process for refactoring and debugging
 
+## Documentation Standards
+
+### Mermaid Diagram Style Guide
+
+**다크/라이트 모드 호환 색상 체계** - 모든 Mermaid 다이어그램은 다음 스타일 가이드를 따라야 합니다:
+
+#### 권장 색상 팔레트
+
+**기본 색상 (Material Design 기반)**:
+```mermaid
+graph LR
+    A[시작/진행] --> B[성공/완료]
+    B --> C[경고/대기]
+    C --> D[실패/오류]
+    D --> E[특별/검토]
+    
+    style A fill:#1976d2,stroke:#0d47a1,stroke-width:2px,color:#fff
+    style B fill:#2e7d32,stroke:#1b5e20,stroke-width:2px,color:#fff
+    style C fill:#f57c00,stroke:#e65100,stroke-width:2px,color:#fff
+    style D fill:#d32f2f,stroke:#b71c1c,stroke-width:2px,color:#fff
+    style E fill:#7b1fa2,stroke:#4a148c,stroke-width:2px,color:#fff
+```
+
+#### 스타일 속성 규칙
+
+**필수 속성**:
+- `fill`: 진한 색상 사용 (다크 모드 대응)
+- `stroke`: fill보다 더 진한 테두리 색상
+- `stroke-width: 2px`: 충분한 테두리 두께
+- `color: #fff`: 흰색 텍스트 (모든 배경에서 가독성 확보)
+
+**색상 매핑 가이드**:
+- **파란색 계열** (`#1976d2`, `#0288d1`): 시작, 진행, 일반 프로세스
+- **초록색 계열** (`#2e7d32`, `#388e3c`): 성공, 완료, 승인
+- **주황색 계열** (`#f57c00`, `#ff8f00`): 경고, 대기, 검토 필요
+- **빨간색 계열** (`#d32f2f`): 실패, 오류, 중단
+- **보라색 계열** (`#7b1fa2`, `#c2185b`): 특별 프로세스, 수동 검토
+
+#### 사용 예시
+
+**잘못된 예 (다크 모드 비호환)**:
+```mermaid
+graph TD
+    A[프로세스] --> B[결과]
+    
+    style A fill:#e3f2fd  # 너무 연한 색상
+    style B fill:#c8e6c9  # 테두리 없음, 다크 모드에서 안 보임
+```
+
+**올바른 예 (다크/라이트 모드 호환)**:
+```mermaid
+graph TD
+    A[프로세스] --> B[결과]
+    
+    style A fill:#1976d2,stroke:#0d47a1,stroke-width:2px,color:#fff
+    style B fill:#2e7d32,stroke:#1b5e20,stroke-width:2px,color:#fff
+```
+
+#### 접근성 고려사항
+
+- **대비율**: 배경과 텍스트 간 4.5:1 이상 유지
+- **색상 의존성 방지**: 색상 외에도 모양, 텍스트로 정보 전달
+- **일관성**: 같은 의미의 요소는 문서 전반에서 동일한 색상 사용
+
+#### 브랜치별 색상 권장사항
+
+```mermaid
+graph TD
+    A[main] --> B[feature]
+    B --> C[fix]
+    C --> D[refactor]
+    D --> E[docs]
+    
+    style A fill:#2e7d32,stroke:#1b5e20,stroke-width:2px,color:#fff
+    style B fill:#1976d2,stroke:#0d47a1,stroke-width:2px,color:#fff
+    style C fill:#d32f2f,stroke:#b71c1c,stroke-width:2px,color:#fff
+    style D fill:#f57c00,stroke:#e65100,stroke-width:2px,color:#fff
+    style E fill:#7b1fa2,stroke:#4a148c,stroke-width:2px,color:#fff
+```
+
 ## Notes
 
 - All communication and documentation should be in Korean except for technical terms and cloud resource descriptions
@@ -588,4 +668,5 @@ The project also incorporates Windsurf development rules from `global_windsurf_r
 - Infrastructure code descriptions should be in English for AWS resources
 - Pre-commit hooks enforce quality gates automatically - never bypass with `--no-verify`
 - Follow the design documents in `docs/design/` for architectural decisions
+- **Mermaid 다이어그램**: 위의 색상 가이드를 준수하여 다크/라이트 모드 호환성 확보
 - 이슈를 닫을때에는 반드시 증거를 첨부해줘.
