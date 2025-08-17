@@ -32,8 +32,16 @@ cd frontend && npm test -- ComponentName.test.tsx
 # 로컬 개발 서버 대상 (자동으로 서버 시작)
 npm run test:e2e:local
 
+# GitHub Pages 자동 감지 테스트 (GitHub CLI 사용)
+npm run test:e2e:pages
+
 # 리모트 사이트 대상 (PLAYWRIGHT_BASE_URL 환경변수 필요)
 PLAYWRIGHT_BASE_URL=https://example.com npm run test:e2e:remote
+
+# No Report 모드 (HTML 리포트 생성 안함, 빠른 실행)
+npm run test:e2e:noreport           # 기본 환경변수 사용
+npm run test:e2e:local:noreport     # 로컬 서버 대상
+npm run test:e2e:pages:noreport     # GitHub Pages 자동 감지
 
 # 브라우저 창 표시하며 테스트 (디버깅용)
 npm run test:e2e:headed

@@ -10,18 +10,21 @@ import { test, expect } from '@playwright/test';
  */
 test.describe('시각적 회귀 테스트', () => {
   // 각 테스트 전에 앱 페이지로 이동하고 로컬 스토리지 초기화
-  test.beforeEach(async ({ page }) => {
-    // 앱 페이지로 이동
-    await page.goto('/');
+  test.beforeEach(async ({ page, baseURL }) => {
+    // 앱 페이지로 이동 (전체 URL 사용)
+    await page.goto(baseURL || '/');
     
     // 로컬 스토리지 초기화
     await page.evaluate(() => {
       localStorage.clear();
     });
     
+    // React 앱이 완전히 로드될 때까지 대기
+    await page.waitForSelector('[data-testid="todo-input"]', { timeout: 10000 });
+    
     // 테스트용 Todo 항목 추가
-    await page.getByPlaceholder('새 할일 추가').fill('첫 번째 할 일');
-    await page.getByRole('button', { name: '추가' }).click();
+    await page.getByTestId('todo-input').fill('첫 번째 할 일');
+    await page.getByTestId('add-todo-button').click();
   });
 
   test('데스크톱 뷰 레이아웃', async ({ page }) => {

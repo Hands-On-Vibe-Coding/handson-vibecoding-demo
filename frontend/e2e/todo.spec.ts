@@ -9,23 +9,26 @@ import { test, expect } from '@playwright/test';
  */
 test.describe('Todo 앱 기능 테스트', () => {
   // 각 테스트 전에 앱 페이지로 이동하고 로컬 스토리지 초기화
-  test.beforeEach(async ({ page }) => {
-    // 앱 페이지로 이동
-    await page.goto('/');
+  test.beforeEach(async ({ page, baseURL }) => {
+    // 앱 페이지로 이동 (전체 URL 사용)
+    await page.goto(baseURL || '/');
     
     // 로컬 스토리지 초기화
     await page.evaluate(() => {
       localStorage.clear();
     });
+    
+    // React 앱이 완전히 로드될 때까지 대기
+    await page.waitForSelector('[data-testid="todo-input"]', { timeout: 10000 });
   });
 
   test('새로운 Todo 항목 추가', async ({ page }) => {
-    // Todo 입력 필드 찾기
-    const todoInput = page.getByPlaceholder('새 할일 추가');
+    // Todo 입력 필드 찾기 (data-testid 사용)
+    const todoInput = page.getByTestId('todo-input');
     
     // 새 Todo 추가
     await todoInput.fill('Playwright로 테스트 작성하기');
-    await page.getByRole('button', { name: '추가' }).click();
+    await page.getByTestId('add-todo-button').click();
     
     // Todo 항목이 목록에 추가되었는지 확인 (첫 번째 셀의 텍스트 확인)
     await expect(page.locator('table tbody tr').first()).toContainText('Playwright로 테스트 작성하기');
@@ -33,9 +36,9 @@ test.describe('Todo 앱 기능 테스트', () => {
 
   test('Todo 항목 완료 상태 변경', async ({ page }) => {
     // 기존 Todo 항목 추가
-    const todoInput = page.getByPlaceholder('새 할일 추가');
+    const todoInput = page.getByTestId('todo-input');
     await todoInput.fill('완료 상태 테스트');
-    await page.getByRole('button', { name: '추가' }).click();
+    await page.getByTestId('add-todo-button').click();
     
     // 체크박스 클릭하여 완료 상태로 변경
     await page.getByRole('checkbox').first().check();
@@ -47,9 +50,9 @@ test.describe('Todo 앱 기능 테스트', () => {
   // 삭제 기능이 아직 구현되지 않아 테스트에서 제외
   test.skip('Todo 항목 삭제', async ({ page }) => {
     // 기존 Todo 항목 추가
-    const todoInput = page.getByPlaceholder('새 할일 추가');
+    const todoInput = page.getByTestId('todo-input');
     await todoInput.fill('삭제할 항목');
-    await page.getByRole('button', { name: '추가' }).click();
+    await page.getByTestId('add-todo-button').click();
     
     // 메뉴 버튼 클릭
     await page.getByRole('button', { name: '할일 메뉴' }).click();

@@ -11,6 +11,10 @@
     "test:e2e": "playwright test",
     "test:e2e:local": "PLAYWRIGHT_BASE_URL=http://localhost:5173 playwright test",
     "test:e2e:remote": "playwright test",
+    "test:e2e:pages": "PLAYWRIGHT_BASE_URL=$(../scripts/get-pages-url.sh 2>/dev/null) playwright test",
+    "test:e2e:noreport": "playwright test --reporter=line",
+    "test:e2e:local:noreport": "PLAYWRIGHT_BASE_URL=http://localhost:5173 playwright test --reporter=line",
+    "test:e2e:pages:noreport": "PLAYWRIGHT_BASE_URL=$(../scripts/get-pages-url.sh 2>/dev/null) playwright test --reporter=line",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",
     "preview": "vite preview"

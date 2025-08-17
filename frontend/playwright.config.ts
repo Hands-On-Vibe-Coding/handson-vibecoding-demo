@@ -20,7 +20,7 @@ export default defineConfig({
   /* 테스트 실행 간 공유할 수 있는 전역 설정 */
   use: {
     /* 모든 요청에 대한 기본 URL - 환경변수 우선, 없으면 로컬 개발 서버 */
-    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:5173',
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:5173/handson-vibecoding-demo/',
     /* 모든 테스트에서 자동으로 스크린샷 캡처 */
     screenshot: 'only-on-failure',
     /* 모든 테스트에서 트레이스 수집 */
@@ -52,11 +52,11 @@ export default defineConfig({
     },
   ],
 
-  /* 로컬 개발 서버 설정 - CI 환경에서는 비활성화 */
-  ...(!process.env.CI && {
+  /* 로컬 개발 서버 설정 - CI 환경이거나 외부 URL 사용 시 비활성화 */
+  ...(!process.env.CI && !process.env.PLAYWRIGHT_BASE_URL && {
     webServer: {
       command: 'npm run dev',
-      url: 'http://localhost:5173',
+      url: 'http://localhost:5173/handson-vibecoding-demo/',
       reuseExistingServer: true,
     },
   }),
