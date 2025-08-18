@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './hooks';
 
 /**
  * Todo 앱 시각적 회귀 테스트

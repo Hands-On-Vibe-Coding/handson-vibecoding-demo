@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './hooks';
 
 /**
  * Todo 앱 E2E 테스트
@@ -40,11 +40,18 @@ test.describe('Todo 앱 기능 테스트', () => {
     await todoInput.fill('완료 상태 테스트');
     await page.getByTestId('add-todo-button').click();
     
-    // 체크박스 클릭하여 완료 상태로 변경
-    await page.getByRole('checkbox').first().check();
+    // Todo 추가 완료까지 대기
+    await page.waitForTimeout(1000);
     
-    // 완료 상태로 변경되었는지 확인 (체크박스가 체크되었는지 확인)
-    await expect(page.getByRole('checkbox').first()).toBeChecked();
+    // 체크박스 클릭하여 완료 상태로 변경 (check 대신 click 사용)
+    const checkbox = page.getByRole('checkbox').first();
+    await checkbox.click();
+    
+    // API 호출 완료까지 대기
+    await page.waitForTimeout(2000);
+    
+    // 완료 상태로 변경되었는지 확인 (aria-label 변경 확인)
+    await expect(page.getByRole('checkbox').first()).toHaveAttribute('aria-label', '할일 완료 취소');
   });
 
   // 삭제 기능이 아직 구현되지 않아 테스트에서 제외

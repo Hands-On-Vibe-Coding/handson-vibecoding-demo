@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { Todo, TodoPriority, TodoStatus } from '@vibecoding-demo/shared/src/types/todo';
 import { LocalStorageAdapter } from '../storage/LocalStorageAdapter';
+import { APIAdapter } from '../storage/APIAdapter';
+import { StorageInterface } from '../storage/StorageInterface';
 
 // Todo 상태 타입 정의
 interface TodoState {
@@ -91,7 +93,7 @@ const todoReducer = (state: TodoState, action: TodoAction): TodoState => {
 interface TodoContextType {
   state: TodoState;
   dispatch: React.Dispatch<TodoAction>;
-  storage: LocalStorageAdapter;
+  storage: StorageInterface;
 }
 
 // Todo 컨텍스트 생성
@@ -100,9 +102,22 @@ const TodoContext = createContext<TodoContextType | undefined>(undefined);
 // TodoProvider 속성 타입 정의
 interface TodoProviderProps {
   children: React.ReactNode;
-  storageKey: string;
+  storageKey?: string;
   initialTodos?: Todo[];
 }
+
+/**
+ * 환경 변수에 따라 적절한 스토리지 어댑터를 생성합니다.
+ */
+const createStorageAdapter = (storageKey?: string): StorageInterface => {
+  const useLocalStorage = import.meta.env.VITE_USE_LOCAL_STORAGE === 'true';
+  
+  if (useLocalStorage) {
+    return new LocalStorageAdapter(storageKey || 'todos');
+  } else {
+    return new APIAdapter();
+  }
+};
 
 // TodoProvider 컴포넌트
 export const TodoProvider: React.FC<TodoProviderProps> = ({ children, storageKey, initialTodos = [] }) => {
@@ -112,7 +127,7 @@ export const TodoProvider: React.FC<TodoProviderProps> = ({ children, storageKey
     todos: initialTodos,
     loading: false
   });
-  const [storage] = useState(() => new LocalStorageAdapter(storageKey));
+  const [storage] = useState(() => createStorageAdapter(storageKey));
   const [initialized, setInitialized] = useState(false);
 
   // 초기 데이터 로드
@@ -142,11 +157,14 @@ export const TodoProvider: React.FC<TodoProviderProps> = ({ children, storageKey
     loadTodos();
   }, [storage, initialTodos, initialized]);
 
-  // 상태가 변경될 때마다 로컬 스토리지 업데이트
+  // 상태가 변경될 때마다 로컬 스토리지 업데이트 (LocalStorageAdapter만 해당)
   useEffect(() => {
     const saveTodos = async () => {
       try {
-        await storage.saveAll(state.todos);
+        // APIAdapter는 개별 저장만 하므로 saveAll 호출하지 않음
+        if (storage.constructor.name === 'LocalStorageAdapter') {
+          await storage.saveAll(state.todos);
+        }
       } catch (error) {
         console.error('로컬 스토리지 저장 실패:', error);
       }

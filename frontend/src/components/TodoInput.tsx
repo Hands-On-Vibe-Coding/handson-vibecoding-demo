@@ -1,28 +1,29 @@
 import { useState } from 'react';
 import { TextInput, Button, Group, Box, Select } from '@mantine/core';
 import { IconPencil, IconPlus } from '@tabler/icons-react';
-import { useTodoDispatch } from '../contexts/TodoContext';
-import { TodoActionType } from '../contexts/TodoContext';
+import { useTodoActions } from '../hooks/useTodoHooks';
 import { TodoPriority } from '@vibecoding-demo/shared/src/types/todo';
 
 export function TodoInput() {
   const [title, setTitle] = useState('');
   const [priority, setPriority] = useState<string>(TodoPriority.MEDIUM);
-  const dispatch = useTodoDispatch();
+  const { addTodo } = useTodoActions();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (title.trim()) {
-      dispatch({
-        type: TodoActionType.ADD_TODO,
-        payload: {
+      try {
+        await addTodo({
           title: title.trim(),
           priority: priority as TodoPriority
-        }
-      });
-      setTitle('');
-      setPriority(TodoPriority.MEDIUM);
+        });
+        setTitle('');
+        setPriority(TodoPriority.MEDIUM);
+      } catch (error) {
+        console.error('Todo 추가 실패:', error);
+        // 사용자에게 오류 메시지를 표시할 수 있습니다.
+      }
     }
   };
 

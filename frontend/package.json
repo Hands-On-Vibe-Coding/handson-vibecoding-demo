@@ -20,6 +20,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@aws-sdk/client-cognito-identity": "^3.864.0",
+    "@aws-sdk/credential-providers": "^3.864.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mantine/core": "^7.17.4",

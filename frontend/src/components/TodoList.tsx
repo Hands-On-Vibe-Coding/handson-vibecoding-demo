@@ -3,7 +3,7 @@ import { Box, Table, Text, Paper, Pagination, Group, Stack, Checkbox, Badge, Act
 import { IconDotsVertical } from '@tabler/icons-react';
 import { TodoItem } from './TodoItem';
 import { TodoFilters } from './TodoFilters';
-import { useTodoState, useTodoDispatch, TodoActionType } from '../contexts/TodoContext';
+import { useTodoState, useTodoActions } from '../hooks/useTodoHooks';
 import { TodoStatus, TodoPriority } from '@vibecoding-demo/shared/src/types/todo';
 
 const priorityConfig = {
@@ -13,8 +13,8 @@ const priorityConfig = {
 };
 
 export function TodoList() {
-  const todos = useTodoState();
-  const dispatch = useTodoDispatch();
+  const { todos } = useTodoState();
+  const { toggleTodoStatus } = useTodoActions();
   const [filter, setFilter] = useState('all');
   const [sortBy, setSortBy] = useState('priority');
   const [currentPage, setCurrentPage] = useState(1);
@@ -88,11 +88,12 @@ export function TodoList() {
                     <Table.Td>
                       <Checkbox
                         checked={todo.status === TodoStatus.COMPLETED}
-                        onChange={() => {
-                          dispatch({
-                            type: TodoActionType.TOGGLE_TODO_STATUS,
-                            payload: { id: todo.id }
-                          });
+                        onChange={async () => {
+                          try {
+                            await toggleTodoStatus(todo.id);
+                          } catch (error) {
+                            console.error('Todo 상태 변경 실패:', error);
+                          }
                         }}
                         aria-label={`할일 ${todo.status === TodoStatus.COMPLETED ? '완료 취소' : '완료'}`}
                       />

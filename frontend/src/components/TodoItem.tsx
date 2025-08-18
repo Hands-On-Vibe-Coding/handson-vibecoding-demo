@@ -1,21 +1,21 @@
 import { Checkbox, Badge, ActionIcon, Group, Text, Box } from '@mantine/core';
 import { IconDotsVertical } from '@tabler/icons-react';
 import { Todo, TodoPriority, TodoStatus } from '@vibecoding-demo/shared/src/types/todo';
-import { useTodoDispatch } from '../contexts/TodoContext';
-import { TodoActionType } from '../contexts/TodoContext';
+import { useTodoActions } from '../hooks/useTodoHooks';
 
 interface TodoItemProps {
   todo: Todo;
 }
 
 export function TodoItem({ todo }: TodoItemProps) {
-  const dispatch = useTodoDispatch();
+  const { toggleTodoStatus } = useTodoActions();
   
-  const handleToggle = () => {
-    dispatch({
-      type: TodoActionType.TOGGLE_TODO_STATUS,
-      payload: { id: todo.id }
-    });
+  const handleToggle = async () => {
+    try {
+      await toggleTodoStatus(todo.id);
+    } catch (error) {
+      console.error('Todo 상태 변경 실패:', error);
+    }
   };
 
   // 우선순위에 따른 배지 색상 및 텍스트
