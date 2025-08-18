@@ -7,6 +7,7 @@ import { type TodoUseCase } from '../../src/domain/todo/todo.usecase';
 const mockTodoRepository: jest.Mocked<TodoRepository> = {
   findById: jest.fn(),
   findByUserId: jest.fn(),
+  findAll: jest.fn(),
   save: jest.fn(),
   delete: jest.fn(),
 };
@@ -93,6 +94,35 @@ describe('TodoUseCase', () => {
       expect(userTodos).toEqual(todos);
       expect(mockTodoRepository.findByUserId).toHaveBeenCalledWith('user-id');
       expect(mockTodoRepository.findByUserId).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('getAllTodos', () => {
+    it('모든 Todo를 조회해야 한다', async () => {
+      // given
+      const todos = [testTodo];
+      mockTodoRepository.findAll.mockResolvedValue(todos);
+
+      // when
+      const allTodos = await todoUseCase.getAllTodos();
+
+      // then
+      expect(allTodos).toEqual(todos);
+      expect(mockTodoRepository.findAll).toHaveBeenCalledWith();
+      expect(mockTodoRepository.findAll).toHaveBeenCalledTimes(1);
+    });
+
+    it('Todo가 없을 때 빈 배열을 반환해야 한다', async () => {
+      // given
+      mockTodoRepository.findAll.mockResolvedValue([]);
+
+      // when
+      const allTodos = await todoUseCase.getAllTodos();
+
+      // then
+      expect(allTodos).toEqual([]);
+      expect(mockTodoRepository.findAll).toHaveBeenCalledWith();
+      expect(mockTodoRepository.findAll).toHaveBeenCalledTimes(1);
     });
   });
 
