@@ -43,8 +43,8 @@ export class LambdaStack extends cdk.Stack {
     // Todo Lambda 함수 생성
     this.todoLambda = new lambda.Function(this, 'TodoLambda', {
       runtime: lambda.Runtime.NODEJS_18_X,
-      handler: 'index.handler',
-      code: lambda.Code.fromAsset('src/lambda/todo'),
+      handler: 'src/lambda/todo/index.handler',
+      code: lambda.Code.fromAsset('dist'),
       role: lambdaRole,
       environment: {
         TODO_TABLE_NAME: databaseStack.todoTable.tableName,
@@ -59,8 +59,8 @@ export class LambdaStack extends cdk.Stack {
     // User Lambda 함수 생성
     this.userLambda = new lambda.Function(this, 'UserLambda', {
       runtime: lambda.Runtime.NODEJS_18_X,
-      handler: 'index.handler',
-      code: lambda.Code.fromAsset('src/lambda/user'),
+      handler: 'src/lambda/user/index.handler',
+      code: lambda.Code.fromAsset('dist'),
       role: lambdaRole,
       environment: {
         USER_TABLE_NAME: databaseStack.userTable.tableName,

@@ -6,6 +6,23 @@ on:
     types:
       - completed
     branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      force_deploy:
+        description: '강제 배포 (변경사항 확인 생략)'
+        required: false
+        default: false
+        type: boolean
+      skip_tests:
+        description: '테스트 건너뛰기 (빠른 배포용)'
+        required: false
+        default: false
+        type: boolean
+      skip_e2e:
+        description: 'E2E 테스트 건너뛰기'
+        required: false
+        default: false
+        type: boolean
 
 env:
   NODE_VERSION: '22.x'
@@ -14,20 +31,34 @@ jobs:
   # 변경사항 확인 및 프론트엔드 빌드 결정
   check-changes:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     outputs:
       should-run: ${{ steps.check.outputs.should-run }}
     steps:
       - name: Checkout 코드
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
           fetch-depth: 2
 
       - name: 프론트엔드 변경사항 확인
         id: check
         run: |
-          # HEAD~1과 HEAD 사이의 변경된 파일 확인
+          # 수동 트리거이면서 강제 배포 옵션이 활성화된 경우
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.force_deploy }}" == "true" ]]; then
+            echo "should-run=true" >> $GITHUB_OUTPUT
+            echo "Manual trigger with force deploy - skipping change detection"
+            exit 0
+          fi
+          
+          # 수동 트리거인 경우 항상 실행
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "should-run=true" >> $GITHUB_OUTPUT
+            echo "Manual trigger - running frontend workflow"
+            exit 0
+          fi
+          
+          # 자동 트리거인 경우 변경사항 확인
           changed_files=$(git diff --name-only HEAD~1 HEAD)
           echo "Changed files: $changed_files"
           
@@ -62,9 +93,11 @@ jobs:
         run: npm run shared:build
 
       - name: 프론트엔드 린트 검사
+        if: ${{ !inputs.skip_tests }}
         run: npm run frontend:lint
 
       - name: 프론트엔드 테스트
+        if: ${{ !inputs.skip_tests }}
         run: npm run frontend:test
 
       - name: 프론트엔드 빌드
@@ -80,7 +113,7 @@ jobs:
   # 프론트엔드 배포 (main 브랜치만)
   deploy-frontend:
     needs: [check-changes, frontend]
-    if: ${{ github.event.workflow_run.head_branch == 'main' && fromJSON(needs.check-changes.outputs.should-run) && needs.frontend.result == 'success' }}
+    if: ${{ (github.event.workflow_run.head_branch == 'main' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')) && fromJSON(needs.check-changes.outputs.should-run) && needs.frontend.result == 'success' }}
     runs-on: ubuntu-latest
     outputs:
       page_url: ${{ steps.deployment.outputs.page_url }}
@@ -133,7 +166,7 @@ jobs:
   # E2E 테스트 (프론트엔드 배포 완료 후)
   e2e-tests:
     needs: [deploy-frontend]
-    if: needs.deploy-frontend.result == 'success'
+    if: ${{ needs.deploy-frontend.result == 'success' && !inputs.skip_e2e }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 코드
