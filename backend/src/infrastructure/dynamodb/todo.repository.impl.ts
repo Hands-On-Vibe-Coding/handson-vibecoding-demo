@@ -1,8 +1,8 @@
 import {
   DynamoDBDocumentClient,
   PutCommand,
-  GetCommand,
   QueryCommand,
+  ScanCommand,
   DeleteCommand,
 } from '@aws-sdk/lib-dynamodb';
 import { TodoRepository } from '../../domain/todo/todo.repository';
@@ -32,15 +32,27 @@ export class TodoRepositoryImpl implements TodoRepository {
   }
 
   async findById(id: string): Promise<Todo | null> {
-    const params = new GetCommand({
+    // Composite Key 테이블에서 id만으로 조회하려면 Scan을 사용해야 함
+    const params = new ScanCommand({
       TableName: this.tableName,
-      Key: { id },
+      FilterExpression: 'id = :id',
+      ExpressionAttributeValues: {
+        ':id': id,
+      },
     });
-    const { Item } = await this.ddbDocClient.send(params);
-    if (!Item) {
+    const { Items } = await this.ddbDocClient.send(params);
+    if (!Items || Items.length === 0) {
       return null;
     }
-    return Todo.reconstruct(Item as TodoProps);
+    return Todo.reconstruct(Items[0] as TodoProps);
+  }
+
+  async findAll(): Promise<Todo[]> {
+    const params = new ScanCommand({
+      TableName: this.tableName,
+    });
+    const { Items } = await this.ddbDocClient.send(params);
+    return (Items || []).map((item) => Todo.reconstruct(item as TodoProps));
   }
 
   async findByUserId(userId: string): Promise<Todo[]> {
@@ -57,9 +69,18 @@ export class TodoRepositoryImpl implements TodoRepository {
   }
 
   async delete(id: string): Promise<void> {
+    // Composite Key 테이블에서 삭제하려면 먼저 항목을 찾아 userId를 얻어야 함
+    const todo = await this.findById(id);
+    if (!todo) {
+      throw new Error(`Todo with id ${id} not found`);
+    }
+
     const params = new DeleteCommand({
       TableName: this.tableName,
-      Key: { id },
+      Key: {
+        id: id,
+        userId: todo.userId,
+      },
     });
     await this.ddbDocClient.send(params);
   }

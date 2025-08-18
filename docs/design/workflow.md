@@ -226,6 +226,77 @@ graph LR
     style H fill:#d32f2f,stroke:#b71c1c,stroke-width:2px,color:#fff
 ```
 
+### 1.3 수동 워크플로우 실행
+
+**목적**: 개발자가 필요에 따라 직접 배포를 트리거할 수 있는 기능
+
+#### 1.3.1 수동 실행 가능한 워크플로우
+
+```mermaid
+graph TD
+    A[GitHub Actions 탭] --> B[워크플로우 선택]
+    B --> C{워크플로우 타입}
+    C -->|Frontend CI/CD| D[프론트엔드 수동 배포]
+    C -->|Backend CI/CD| E[백엔드 수동 배포]
+    
+    D --> F[프론트엔드 옵션 설정]
+    E --> G[백엔드 옵션 설정]
+    
+    F --> H[강제 배포<br/>테스트 건너뛰기<br/>E2E 건너뛰기]
+    G --> I[강제 배포<br/>테스트 건너뛰기]
+    
+    H --> J[워크플로우 실행]
+    I --> J
+    
+    style A fill:#1976d2,stroke:#0d47a1,stroke-width:2px,color:#fff
+    style D fill:#388e3c,stroke:#1b5e20,stroke-width:2px,color:#fff
+    style E fill:#f57c00,stroke:#e65100,stroke-width:2px,color:#fff
+    style J fill:#2e7d32,stroke:#1b5e20,stroke-width:2px,color:#fff
+```
+
+#### 1.3.2 수동 실행 옵션
+
+**Frontend CI/CD 옵션**:
+- `force_deploy`: 강제 배포 (변경사항 확인 생략)
+- `skip_tests`: 테스트 건너뛰기 (빠른 배포용)
+- `skip_e2e`: E2E 테스트 건너뛰기
+
+**Backend CI/CD 옵션**:
+- `force_deploy`: 강제 배포 (변경사항 확인 생략)
+- `skip_tests`: 테스트 건너뛰기 (빠른 배포용)
+
+#### 1.3.3 수동 실행 절차
+
+1. **GitHub Repository 접속**
+2. **Actions 탭 클릭**
+3. **워크플로우 선택** (Frontend CI/CD 또는 Backend CI/CD)
+4. **"Run workflow" 버튼 클릭**
+5. **옵션 설정**:
+   - Branch: main 선택 (배포용)
+   - 필요에 따라 옵션 체크박스 선택
+6. **"Run workflow" 버튼으로 실행**
+
+#### 1.3.4 사용 시나리오
+
+**긴급 배포 시나리오**:
+```bash
+# 옵션: force_deploy=true, skip_tests=true
+# 결과: 변경사항 확인 없이 즉시 배포
+```
+
+**기능 데모 시나리오**:
+```bash
+# Frontend: skip_e2e=true
+# Backend: force_deploy=true
+# 결과: 빠른 배포 후 수동 테스트
+```
+
+**핫픽스 배포 시나리오**:
+```bash
+# 옵션: force_deploy=true (테스트는 유지)
+# 결과: 중요한 검증은 유지하면서 빠른 배포
+```
+
 ## 2. 워크플로우 상세 설계
 
 ### 2.1 Common CI 워크플로우

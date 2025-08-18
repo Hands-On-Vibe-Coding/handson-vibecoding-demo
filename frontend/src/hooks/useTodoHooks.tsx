@@ -107,10 +107,33 @@ interface TodoProviderProps {
 }
 
 /**
+ * 환경 감지 및 스토리지 어댑터 생성
+ */
+function getEnvironmentVariable(name: string, defaultValue: string = ''): string {
+  // Jest 환경 감지
+  if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'test') {
+    return process.env[name] || defaultValue;
+  }
+  
+  // 브라우저 환경에서 Vite 환경 변수 사용
+  if (typeof window !== 'undefined' && typeof (globalThis as any).import?.meta?.env === 'object') {
+    return (globalThis as any).import.meta.env[name] || defaultValue;
+  }
+  
+  return defaultValue;
+}
+
+/**
  * 환경 변수에 따라 적절한 스토리지 어댑터를 생성합니다.
  */
 const createStorageAdapter = (storageKey?: string): StorageInterface => {
-  const useLocalStorage = import.meta.env.VITE_USE_LOCAL_STORAGE === 'true';
+  const useLocalStorageEnv = getEnvironmentVariable('VITE_USE_LOCAL_STORAGE', 'false');
+  const useLocalStorage = useLocalStorageEnv === 'true';
+  
+  // Jest 테스트 환경에서는 기본적으로 LocalStorageAdapter 사용
+  if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'test') {
+    return new LocalStorageAdapter(storageKey || 'todos');
+  }
   
   if (useLocalStorage) {
     return new LocalStorageAdapter(storageKey || 'todos');

@@ -30,7 +30,9 @@
     "prepare": "husky install",
     "cdk:synth": "cd backend && npm run cdk:synth",
     "cdk:deploy": "cd backend && npm run cdk:deploy",
-    "cdk:destroy": "cd backend && npm run cdk:destroy"
+    "cdk:destroy": "cd backend && npm run cdk:destroy",
+    "update-env": "node scripts/update-env.js",
+    "deploy:full": "npm run cdk:deploy && npm run update-env"
   },
   "engines": {
     "node": ">=22.0.0",

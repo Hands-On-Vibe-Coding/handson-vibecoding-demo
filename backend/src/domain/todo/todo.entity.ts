@@ -1,3 +1,5 @@
+import { randomUUID } from 'crypto';
+
 export interface TodoProps {
   id: string;
   title: string;
@@ -6,6 +8,16 @@ export interface TodoProps {
   userId: string;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface TodoJSON {
+  id: string;
+  title: string;
+  description?: string;
+  completed: boolean;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export class Todo {
@@ -18,14 +30,18 @@ export class Todo {
   public static create(props: Omit<TodoProps, 'id' | 'createdAt' | 'updatedAt'>): Todo {
     return new Todo({
       ...props,
-      id: crypto.randomUUID(),
+      id: randomUUID(),
       createdAt: new Date(),
       updatedAt: new Date(),
     });
   }
 
-  public static reconstruct(props: TodoProps): Todo {
-    return new Todo(props);
+  public static reconstruct(props: TodoProps | any): Todo {
+    return new Todo({
+      ...props,
+      createdAt: typeof props.createdAt === 'string' ? new Date(props.createdAt) : props.createdAt,
+      updatedAt: typeof props.updatedAt === 'string' ? new Date(props.updatedAt) : props.updatedAt,
+    });
   }
 
   get id(): string {
@@ -74,7 +90,11 @@ export class Todo {
     this.props.updatedAt = new Date();
   }
 
-  public toJSON(): TodoProps {
-    return { ...this.props };
+  public toJSON(): TodoJSON {
+    return {
+      ...this.props,
+      createdAt: this.props.createdAt.toISOString(),
+      updatedAt: this.props.updatedAt.toISOString(),
+    };
   }
 }

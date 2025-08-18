@@ -22,6 +22,10 @@ export class TodoUseCaseImpl implements TodoUseCase {
     return this.todoRepository.findById(id);
   }
 
+  async getAllTodos(): Promise<Todo[]> {
+    return this.todoRepository.findAll();
+  }
+
   async getUserTodos(userId: string): Promise<Todo[]> {
     return this.todoRepository.findByUserId(userId);
   }

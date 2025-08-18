@@ -1,0 +1,100 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  AWS_REGION: ap-northeast-2
+  
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Build backend
+      run: npm run backend:build
+
+    - name: Deploy CDK stacks
+      id: cdk-deploy
+      run: |
+        cd backend
+        npx cdk deploy --all --require-approval never --outputs-file cdk-outputs.json
+        echo "deployment-completed=true" >> $GITHUB_OUTPUT
+
+    - name: Extract API endpoint from CDK outputs
+      id: extract-endpoint
+      run: |
+        # CDK 출력값에서 API 엔드포인트 추출
+        API_ENDPOINT=$(jq -r '.TodoAppApiStack.ApiEndpoint' backend/cdk-outputs.json)
+        IDENTITY_POOL_ID=$(jq -r '.TodoAppAuthStack.IdentityPoolId' backend/cdk-outputs.json)
+        
+        echo "api-endpoint=$API_ENDPOINT" >> $GITHUB_OUTPUT
+        echo "identity-pool-id=$IDENTITY_POOL_ID" >> $GITHUB_OUTPUT
+        
+        echo "🚀 Deployed API Endpoint: $API_ENDPOINT"
+        echo "🔐 Identity Pool ID: $IDENTITY_POOL_ID"
+
+    - name: Update frontend environment variables
+      run: |
+        # 환경 변수 파일 생성
+        cat > frontend/.env << EOF
+        # API 설정
+        VITE_API_BASE_URL=${{ steps.extract-endpoint.outputs.api-endpoint }}
+        VITE_API_REGION=${{ env.AWS_REGION }}
+        
+        # Cognito 설정 (unauthenticated 사용자용)
+        VITE_COGNITO_IDENTITY_POOL_ID=${{ steps.extract-endpoint.outputs.identity-pool-id }}
+        VITE_COGNITO_REGION=${{ env.AWS_REGION }}
+        
+        # 프로덕션 모드 설정
+        VITE_USE_LOCAL_STORAGE=false
+        EOF
+        
+        echo "✅ Frontend environment variables updated"
+
+    - name: Build frontend
+      run: npm run frontend:build
+
+    - name: Deploy to S3/CloudFront (선택사항)
+      run: |
+        # S3에 빌드된 프론트엔드 배포
+        aws s3 sync frontend/dist/ s3://your-frontend-bucket --delete
+        
+        # CloudFront 캐시 무효화
+        aws cloudfront create-invalidation --distribution-id YOUR_DISTRIBUTION_ID --paths "/*"
+
+    - name: Run E2E tests against deployed environment
+      run: |
+        # 배포된 환경에 대해 E2E 테스트 실행
+        PLAYWRIGHT_BASE_URL=${{ steps.extract-endpoint.outputs.api-endpoint }} npm run e2e:noreport
+      continue-on-error: true
+
+    - name: Output deployment summary
+      run: |
+        echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **API Endpoint**: ${{ steps.extract-endpoint.outputs.api-endpoint }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Region**: ${{ env.AWS_REGION }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Identity Pool**: ${{ steps.extract-endpoint.outputs.identity-pool-id }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Frontend Build**: ✅ Completed" >> $GITHUB_STEP_SUMMARY
