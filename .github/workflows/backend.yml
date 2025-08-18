@@ -131,9 +131,10 @@ jobs:
       - name: AWS 자격증명 설정
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-to-assume: arn:aws:iam::931016744724:role/GitHubActionsDeployRole
           role-session-name: GitHub-Actions-Deploy
           aws-region: ap-northeast-2
+          audience: sts.amazonaws.com
         continue-on-error: true
       
       - name: 의존성 설치
