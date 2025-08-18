@@ -1,6 +1,6 @@
 import { Stack, Box } from '@mantine/core';
 import { MantineProvider } from './components/MantineProvider';
-import { TodoProvider } from './contexts/TodoContext';
+import { TodoProvider } from './hooks/useTodoHooks';
 import { Header } from './components/Header';
 import { TodoInput } from './components/TodoInput';
 import { TodoList } from './components/TodoList';
