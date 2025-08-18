@@ -99,8 +99,8 @@ describe('Todo Entity', () => {
       description: todo.description,
       completed: todo.completed,
       userId: todo.userId,
-      createdAt: todo.createdAt,
-      updatedAt: todo.updatedAt,
+      createdAt: todo.createdAt.toISOString(),
+      updatedAt: todo.updatedAt.toISOString(),
     });
   });
 

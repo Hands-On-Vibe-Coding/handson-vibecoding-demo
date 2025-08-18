@@ -2,7 +2,7 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
   DynamoDBDocumentClient,
   PutCommand,
-  GetCommand,
+  ScanCommand,
   QueryCommand,
   DeleteCommand,
 } from '@aws-sdk/lib-dynamodb';
@@ -73,7 +73,7 @@ describe('TodoRepositoryImpl', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      ddbMock.on(GetCommand).resolves({ Item: todoProps });
+      ddbMock.on(ScanCommand).resolves({ Items: [todoProps] });
 
       // Act
       const result = await todoRepository.findById('1');
@@ -81,12 +81,16 @@ describe('TodoRepositoryImpl', () => {
       // Assert
       expect(result).toBeInstanceOf(Todo);
       expect(result?.id).toEqual('1');
-      expect(result?.toJSON()).toEqual(todoProps);
+      expect(result?.toJSON()).toEqual({
+        ...todoProps,
+        createdAt: todoProps.createdAt.toISOString(),
+        updatedAt: todoProps.updatedAt.toISOString(),
+      });
     });
 
     it('should return null if todo item not found', async () => {
       // Arrange
-      ddbMock.on(GetCommand).resolves({ Item: undefined });
+      ddbMock.on(ScanCommand).resolves({ Items: [] });
 
       // Act
       const result = await todoRepository.findById('1');
@@ -125,22 +129,89 @@ describe('TodoRepositoryImpl', () => {
       // Assert
       expect(result.length).toBe(2);
       expect(result[0]).toBeInstanceOf(Todo);
-      expect(result[0].toJSON()).toEqual(todosProps[0]);
+      expect(result[0].toJSON()).toEqual({
+        ...todosProps[0],
+        createdAt: todosProps[0].createdAt.toISOString(),
+        updatedAt: todosProps[0].updatedAt.toISOString(),
+      });
+    });
+  });
+
+  describe('findAll', () => {
+    it('should return all todo items', async () => {
+      // Arrange
+      const todosProps: TodoProps[] = [
+        {
+          id: '1',
+          title: 'Test Todo 1',
+          completed: false,
+          userId: 'user1',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: '2',
+          title: 'Test Todo 2',
+          completed: true,
+          userId: 'user2',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ];
+      ddbMock.on(ScanCommand).resolves({ Items: todosProps });
+
+      // Act
+      const result = await todoRepository.findAll();
+
+      // Assert
+      expect(result.length).toBe(2);
+      expect(result[0]).toBeInstanceOf(Todo);
+      expect(result[0].toJSON()).toEqual({
+        ...todosProps[0],
+        createdAt: todosProps[0].createdAt.toISOString(),
+        updatedAt: todosProps[0].updatedAt.toISOString(),
+      });
+      expect(result[1]).toBeInstanceOf(Todo);
+      expect(result[1].toJSON()).toEqual({
+        ...todosProps[1],
+        createdAt: todosProps[1].createdAt.toISOString(),
+        updatedAt: todosProps[1].updatedAt.toISOString(),
+      });
+    });
+
+    it('should return empty array when no todos exist', async () => {
+      // Arrange
+      ddbMock.on(ScanCommand).resolves({ Items: [] });
+
+      // Act
+      const result = await todoRepository.findAll();
+
+      // Assert
+      expect(result).toEqual([]);
     });
   });
 
   describe('delete', () => {
     it('should delete a todo item', async () => {
       // Arrange
+      const todoProps: TodoProps = {
+        id: '1',
+        title: 'Test Todo',
+        completed: false,
+        userId: 'user1',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      ddbMock.on(ScanCommand).resolves({ Items: [todoProps] });
       ddbMock.on(DeleteCommand).resolves({});
 
       // Act
       await todoRepository.delete('1');
 
       // Assert
-      const deleteCommand = ddbMock.calls()[0].args[0] as DeleteCommand;
+      const deleteCommand = ddbMock.calls().find(call => call.args[0] instanceof DeleteCommand)?.args[0] as DeleteCommand;
       expect(deleteCommand.input.TableName).toEqual(tableName);
-      expect(deleteCommand.input.Key).toEqual({ id: '1' });
+      expect(deleteCommand.input.Key).toEqual({ id: '1', userId: 'user1' });
     });
   });
 });
