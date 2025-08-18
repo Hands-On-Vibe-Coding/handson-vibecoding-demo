@@ -209,7 +209,8 @@ describe('TodoRepositoryImpl', () => {
       await todoRepository.delete('1');
 
       // Assert
-      const deleteCommand = ddbMock.calls().find(call => call.args[0] instanceof DeleteCommand)?.args[0] as DeleteCommand;
+      const deleteCommand = ddbMock.calls().find((call) => call.args[0] instanceof DeleteCommand)
+        ?.args[0] as DeleteCommand;
       expect(deleteCommand.input.TableName).toEqual(tableName);
       expect(deleteCommand.input.Key).toEqual({ id: '1', userId: 'user1' });
     });
