@@ -214,6 +214,7 @@ npx cdk deploy TodoAppApiStack
 **원인**: Lambda 콜드 스타트
 
 **해결 방법**:
+
 ```typescript
 // Provisioned Concurrency 설정
 const fn = new lambda.Function(this, 'Function', {
@@ -260,6 +261,7 @@ export default defineConfig({
 **원인**: CSS-in-JS 설정 누락
 
 **해결 방법**:
+
 ```tsx
 // frontend/src/main.tsx
 import { MantineProvider } from '@mantine/core';
@@ -283,6 +285,7 @@ root.render(
 **원인**: DynamoDB Local이 실행되지 않음
 
 **해결 방법**:
+
 ```bash
 # Docker로 DynamoDB Local 실행
 docker run -p 8000:8000 amazon/dynamodb-local
@@ -299,6 +302,7 @@ java -Djava.library.path=./DynamoDBLocal_lib \
 **원인**: AWS 환경과 로컬 환경의 차이
 
 **해결 방법**:
+
 ```bash
 # SAM CLI 사용
 sam local start-api
@@ -333,6 +337,7 @@ npm run shared:build && npm run backend:build && npm run frontend:build
 **원인**: Node.js 버전 차이
 
 **해결 방법**:
+
 ```bash
 # .nvmrc 파일 생성
 echo "22.13.1" > .nvmrc
@@ -352,6 +357,7 @@ nvm use
 **원인**: Husky 설치 문제
 
 **해결 방법**:
+
 ```bash
 # Husky 재설치
 npx husky install
@@ -368,6 +374,7 @@ chmod +x .husky/pre-commit
 **원인**: 모든 파일에 대해 테스트 실행
 
 **해결 방법**:
+
 ```bash
 # 변경된 파일만 검사하도록 수정
 #!/bin/sh
@@ -414,6 +421,7 @@ rm -f package-lock.json */package-lock.json
 # 새로 설치
 npm install
 ```
+
 
 ---
 
