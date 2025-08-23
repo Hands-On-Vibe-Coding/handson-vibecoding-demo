@@ -32,6 +32,7 @@
 | `T001-Information-Asset-Inventory.md` | 정보자산 전수 조사 결과 (58개 자산) | ✅ 완료 |
 | `T002-Security-Assessment-Report.md` | 보안 수준 평가 보고서 (22개 취약점) | ✅ 완료 |
 | `T003-ISMS-P-Gap-Analysis.md` | ISMS-P 인증기준 Gap 분석 (준수율 31.7%) | ✅ 완료 |
+| `T004-Stakeholder-Interview-Templates.md` | 이해관계자 인터뷰 템플릿 (6개 역할별) | ✅ 완료 |
 | `T012-Critical-Risk-Response-Plan.md` | Critical Risk 긴급 대응 실행 계획 | ✅ 완료 |
 
 ### 4. 참조 자료
