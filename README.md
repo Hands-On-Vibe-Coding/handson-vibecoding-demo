@@ -129,6 +129,65 @@ cd shared && npm run build && npm test
 - **[backend/README.md](./backend/README.md)**: 백엔드 아키텍처 가이드
 - **[shared/README.md](./shared/README.md)**: 공유 모듈 사용법
 
+## 보안 강화 프로젝트
+
+이 프로젝트는 **K-ISMS-P (Korean Information Security Management System - Personal Information Protection) 인증 취득**을 목표로 하는 종합적인 보안 강화 작업을 진행하고 있습니다.
+
+### 🎯 보안 목표
+
+- **K-ISMS-P 인증**: 101개 인증기준 100% 충족
+- **보안 수준 향상**: Critical Risk 0개 달성
+- **개인정보보호**: 생명주기 자동 관리 체계 구축
+- **컴플라이언스**: 개인정보보호법, 정보통신망법 준수
+
+### 📋 보안 프로젝트 구조 (8개월, 5 Phase)
+
+| Phase | 기간 | 주요 작업 | 상태 |
+|-------|------|-----------|------|
+| **Phase 0: Discovery** | Week 1-4 | 현황 조사, Gap 분석, 로드맵 수립 | 📋 계획됨 |
+| **Phase 1: Foundation** | Week 5-12 | 조직 구성, 정책 수립, 위험 평가 | 📋 계획됨 |
+| **Phase 2: Protection** | Week 13-20 | RBAC, 암호화, 로그 관리, 모니터링 | 📋 계획됨 |
+| **Phase 3: Compliance** | Week 21-24 | 개인정보 생명주기, 권리보호 시스템 | 📋 계획됨 |
+| **Phase 4: Certification** | Week 25-32 | 내부감사, 모의심사, 인증 취득 | 📋 계획됨 |
+
+### 🛡️ 구현 예정 보안 기능
+
+#### 접근 통제
+- **Multi-Factor Authentication (MFA)**: SMS/TOTP 기반
+- **Role-Based Access Control (RBAC)**: 최소 권한 원칙
+- **세션 관리**: 30분 타임아웃, 동시 세션 제한
+
+#### 데이터 보호
+- **저장 데이터 암호화**: DynamoDB, S3 (AES-256)
+- **전송 데이터 암호화**: TLS 1.2+ 강제 적용
+- **키 관리**: AWS KMS 기반 자동 로테이션
+
+#### 모니터링 & 로깅
+- **중앙 로그 관리**: CloudWatch + S3 (3년 보관)
+- **실시간 위협 탐지**: GuardDuty, Security Hub
+- **보안 이벤트 대시보드**: 이상 징후 자동 알림
+
+#### 개인정보 보호
+- **생명주기 자동 관리**: 수집 → 이용 → 파기 자동화
+- **정보주체 권리**: 열람, 정정/삭제, 처리정지 시스템
+- **동의 관리**: 세분화된 동의, 철회 기능
+
+### 📊 보안 문서
+
+- **[docs/Security/README.md](./docs/Security/README.md)**: 보안 프로젝트 종합 가이드
+- **[docs/Security/K-ISMS-P-PRD.md](./docs/Security/K-ISMS-P-PRD.md)**: 보안 강화 PRD
+- **[docs/Security/K-ISMS-P-Tasks.md](./docs/Security/K-ISMS-P-Tasks.md)**: 34개 실행 태스크 리스트
+
+### 🔗 보안 이슈 추적
+
+보안 프로젝트의 모든 작업은 GitHub Issues로 관리됩니다:
+
+- **Phase 0 Issues**: [#29](https://github.com/Hands-On-Vibe-Coding/handson-vibecoding-demo/issues/29) - [#33](https://github.com/Hands-On-Vibe-Coding/handson-vibecoding-demo/issues/33) (Discovery)
+- **Phase 1 Issues**: [#34](https://github.com/Hands-On-Vibe-Coding/handson-vibecoding-demo/issues/34) - [#41](https://github.com/Hands-On-Vibe-Coding/handson-vibecoding-demo/issues/41) (Foundation)
+- **Phase 2 Issues**: [#42](https://github.com/Hands-On-Vibe-Coding/handson-vibecoding-demo/issues/42) - [#44](https://github.com/Hands-On-Vibe-Coding/handson-vibecoding-demo/issues/44) (Protection)
+- **Phase 3 Issues**: [#45](https://github.com/Hands-On-Vibe-Coding/handson-vibecoding-demo/issues/45) - [#46](https://github.com/Hands-On-Vibe-Coding/handson-vibecoding-demo/issues/46) (Compliance)  
+- **Phase 4 Issues**: [#47](https://github.com/Hands-On-Vibe-Coding/handson-vibecoding-demo/issues/47) - [#49](https://github.com/Hands-On-Vibe-Coding/handson-vibecoding-demo/issues/49) (Certification)
+
 ## 프로젝트 규칙
 
 ### 개발 원칙
