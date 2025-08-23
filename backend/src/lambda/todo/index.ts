@@ -1,8 +1,7 @@
-import 'source-map-support/register';
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import { TodoController } from '@/interfaces/rest/todo.controller';
-import { TodoUseCaseImpl } from '@/application/todo/todo.usecase.impl';
-import { TodoRepositoryImpl } from '@/infrastructure/dynamodb/todo.repository.impl';
+import { TodoController } from '../../interfaces/rest/todo.controller';
+import { TodoUseCaseImpl } from '../../application/todo/todo.usecase.impl';
+import { TodoRepositoryImpl } from '../../infrastructure/dynamodb/todo.repository.impl';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 
@@ -22,6 +21,10 @@ export const handler = async (
   // Router using regex
   if (httpMethod === 'POST' && path === '/todos') {
     return todoController.create(event);
+  }
+
+  if (httpMethod === 'GET' && path === '/todos') {
+    return todoController.getAll(event);
   }
 
   const getByIdMatch = path.match(/^\/todos\/([^/]+)$/);

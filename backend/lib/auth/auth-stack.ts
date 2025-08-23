@@ -1,10 +1,13 @@
 import * as cdk from 'aws-cdk-lib';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
+import * as iam from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 
 export class AuthStack extends cdk.Stack {
   public readonly userPool: cognito.UserPool;
   public readonly userPoolClient: cognito.UserPoolClient;
+  public readonly identityPool: cognito.CfnIdentityPool;
+  public readonly unauthenticatedRole: iam.Role;
 
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -51,6 +54,56 @@ export class AuthStack extends cdk.Stack {
       preventUserExistenceErrors: true,
     });
 
+    // Cognito Identity Pool 생성 (unauthenticated 사용자 지원)
+    this.identityPool = new cognito.CfnIdentityPool(this, 'TodoAppIdentityPool', {
+      identityPoolName: 'todo-app-identity-pool',
+      allowUnauthenticatedIdentities: true,
+      cognitoIdentityProviders: [
+        {
+          clientId: this.userPoolClient.userPoolClientId,
+          providerName: this.userPool.userPoolProviderName,
+        },
+      ],
+    });
+
+    // 비인증 사용자를 위한 IAM 역할 생성
+    this.unauthenticatedRole = new iam.Role(this, 'UnauthenticatedRole', {
+      assumedBy: new iam.FederatedPrincipal(
+        'cognito-identity.amazonaws.com',
+        {
+          StringEquals: {
+            'cognito-identity.amazonaws.com:aud': this.identityPool.ref,
+          },
+          'ForAnyValue:StringLike': {
+            'cognito-identity.amazonaws.com:amr': 'unauthenticated',
+          },
+        },
+        'sts:AssumeRoleWithWebIdentity',
+      ),
+      inlinePolicies: {
+        UnauthenticatedPolicy: new iam.PolicyDocument({
+          statements: [
+            new iam.PolicyStatement({
+              effect: iam.Effect.ALLOW,
+              actions: ['execute-api:Invoke'],
+              resources: [
+                'arn:aws:execute-api:*:*:*/*/todos',
+                'arn:aws:execute-api:*:*:*/*/todos/*',
+              ],
+            }),
+          ],
+        }),
+      },
+    });
+
+    // Identity Pool에 역할 할당
+    new cognito.CfnIdentityPoolRoleAttachment(this, 'IdentityPoolRoleAttachment', {
+      identityPoolId: this.identityPool.ref,
+      roles: {
+        unauthenticated: this.unauthenticatedRole.roleArn,
+      },
+    });
+
     // 스택 출력값 설정
     new cdk.CfnOutput(this, 'UserPoolId', {
       value: this.userPool.userPoolId,
@@ -60,6 +113,16 @@ export class AuthStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'UserPoolClientId', {
       value: this.userPoolClient.userPoolClientId,
       description: 'Cognito User Pool Client ID',
+    });
+
+    new cdk.CfnOutput(this, 'IdentityPoolId', {
+      value: this.identityPool.ref,
+      description: 'Cognito Identity Pool ID',
+    });
+
+    new cdk.CfnOutput(this, 'UnauthenticatedRoleArn', {
+      value: this.unauthenticatedRole.roleArn,
+      description: 'Unauthenticated Role ARN',
     });
   }
 }

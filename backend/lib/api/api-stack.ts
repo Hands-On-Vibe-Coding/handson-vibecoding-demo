@@ -47,26 +47,16 @@ export class ApiStack extends cdk.Stack {
     const todoResource = this.api.root.addResource('todos');
     const todoIdResource = todoResource.addResource('{id}');
 
-    // Todo API 메서드 생성
-    todoResource.addMethod('GET', new apigateway.LambdaIntegration(lambdaStack.todoLambda), {
-      authorizer,
-    });
+    // Todo API 메서드 생성 (인증 없이 접근 가능)
+    todoResource.addMethod('GET', new apigateway.LambdaIntegration(lambdaStack.todoLambda));
 
-    todoResource.addMethod('POST', new apigateway.LambdaIntegration(lambdaStack.todoLambda), {
-      authorizer,
-    });
+    todoResource.addMethod('POST', new apigateway.LambdaIntegration(lambdaStack.todoLambda));
 
-    todoIdResource.addMethod('GET', new apigateway.LambdaIntegration(lambdaStack.todoLambda), {
-      authorizer,
-    });
+    todoIdResource.addMethod('GET', new apigateway.LambdaIntegration(lambdaStack.todoLambda));
 
-    todoIdResource.addMethod('PUT', new apigateway.LambdaIntegration(lambdaStack.todoLambda), {
-      authorizer,
-    });
+    todoIdResource.addMethod('PUT', new apigateway.LambdaIntegration(lambdaStack.todoLambda));
 
-    todoIdResource.addMethod('DELETE', new apigateway.LambdaIntegration(lambdaStack.todoLambda), {
-      authorizer,
-    });
+    todoIdResource.addMethod('DELETE', new apigateway.LambdaIntegration(lambdaStack.todoLambda));
 
     // User API 리소스 생성
     const userResource = this.api.root.addResource('users');
