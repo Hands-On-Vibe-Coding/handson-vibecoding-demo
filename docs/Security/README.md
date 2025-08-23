@@ -17,65 +17,65 @@
 ### 1. 기획 문서
 | 파일명 | 설명 | 상태 |
 |--------|------|------|
-| `pre-PRD.md` | PRD 작성을 위한 사전 질문지 | ✅ 완료 |
-| `ISMS-P-based-PRD-answers.md` | 인증기준 기반 PRD 답변서 | ✅ 완료 |
-| `K-ISMS-P-PRD.md` | 보안 강화 프로젝트 PRD (Product Requirements Document) | ✅ 완료 |
+| [`pre-PRD.md`](./pre-PRD.md) | PRD 작성을 위한 사전 질문지 | ✅ 완료 |
+| [`ISMS-P-based-PRD-answers.md`](./ISMS-P-based-PRD-answers.md) | 인증기준 기반 PRD 답변서 | ✅ 완료 |
+| [`K-ISMS-P-PRD.md`](./K-ISMS-P-PRD.md) | 보안 강화 프로젝트 PRD (Product Requirements Document) | ✅ 완료 |
 
 ### 2. 실행 계획
 | 파일명 | 설명 | 상태 |
 |--------|------|------|
-| `K-ISMS-P-Tasks.md` | 34개 실행 태스크 리스트 (T001-T034) | ✅ 완료 |
+| [`K-ISMS-P-Tasks.md`](./K-ISMS-P-Tasks.md) | 34개 실행 태스크 리스트 (T001-T034) | ✅ 완료 |
 
 ### 3. 평가 및 분석 결과
-| 파일명 | 설명 | 상태 |
-|--------|------|------|
-| `T001-Information-Asset-Inventory.md` | 정보자산 전수 조사 결과 (58개 자산) | ✅ 완료 |
-| `T002-Security-Assessment-Report.md` | 보안 수준 평가 보고서 (22개 취약점) | ✅ 완료 |
-| `T003-ISMS-P-Gap-Analysis.md` | ISMS-P 인증기준 Gap 분석 (준수율 31.7%) | ✅ 완료 |
-| `T004-Stakeholder-Interview-Templates.md` | 이해관계자 인터뷰 템플릿 (6개 역할별) | ✅ 완료 |
-| `T012-Critical-Risk-Response-Plan.md` | Critical Risk 긴급 대응 실행 계획 | ✅ 완료 |
+| 파일명 | 설명 | GitHub Issue | 상태 |
+|--------|------|-------------|------|
+| [`T001-Information-Asset-Inventory.md`](./T001-Information-Asset-Inventory.md) | 정보자산 전수 조사 결과 (58개 자산) | [#29](https://github.com/serithemage/handson-vibecoding-demo/issues/29) | ✅ 완료 |
+| [`T002-Security-Assessment-Report.md`](./T002-Security-Assessment-Report.md) | 보안 수준 평가 보고서 (22개 취약점) | [#30](https://github.com/serithemage/handson-vibecoding-demo/issues/30) | ✅ 완료 |
+| [`T003-ISMS-P-Gap-Analysis.md`](./T003-ISMS-P-Gap-Analysis.md) | ISMS-P 인증기준 Gap 분석 (준수율 31.7%) | [#31](https://github.com/serithemage/handson-vibecoding-demo/issues/31) | ✅ 완료 |
+| [`T004-Stakeholder-Interview-Templates.md`](./T004-Stakeholder-Interview-Templates.md) | 이해관계자 인터뷰 템플릿 (6개 역할별) | [#32](https://github.com/serithemage/handson-vibecoding-demo/issues/32) | ✅ 완료 |
+| [`T012-Critical-Risk-Response-Plan.md`](./T012-Critical-Risk-Response-Plan.md) | Critical Risk 긴급 대응 실행 계획 | [#40](https://github.com/serithemage/handson-vibecoding-demo/issues/40) | ✅ 완료 |
 
 ### 4. 참조 자료
 | 파일명 | 설명 | 상태 |
 |--------|------|------|
-| `ISMS-P 인증기준 안내서(2023.11.23).pdf` | 공식 K-ISMS-P 인증기준 가이드라인 | ✅ 참조용 |
-| `ISMS-P_text.txt` | PDF를 텍스트로 변환한 파일 | ✅ 분석용 |
+| [`ISMS-P 인증기준 안내서(2023.11.23).pdf`](./ISMS-P%20인증기준%20안내서(2023.11.23).pdf) | 공식 K-ISMS-P 인증기준 가이드라인 | ✅ 참조용 |
+| [`ISMS-P_text.txt`](./ISMS-P_text.txt) | PDF를 텍스트로 변환한 파일 | ✅ 분석용 |
 
 ## 🚀 프로젝트 Phase 구조
 
 ### Phase 0: Discovery (Week 1-4)
 **현황 조사 및 기획**
-- T001: 정보자산 전수 조사
-- T002: 현재 보안 수준 평가  
-- T003: ISMS-P Gap 분석
-- T004: 이해관계자 인터뷰
-- T005: 상세 로드맵 수립
+- [T001](https://github.com/serithemage/handson-vibecoding-demo/issues/29): 정보자산 전수 조사
+- [T002](https://github.com/serithemage/handson-vibecoding-demo/issues/30): 현재 보안 수준 평가  
+- [T003](https://github.com/serithemage/handson-vibecoding-demo/issues/31): ISMS-P Gap 분석
+- [T004](https://github.com/serithemage/handson-vibecoding-demo/issues/32): 이해관계자 인터뷰
+- [T005](https://github.com/serithemage/handson-vibecoding-demo/issues/33): 상세 로드맵 수립
 
 ### Phase 1: Foundation (Week 5-12)
 **기본 체계 구축**
-- T006: 정보보호 조직 구성
-- T007: 기본 정책 수립
-- T008-T009: 정보자산 관리 체계
-- T010-T011: 위험평가 체계
-- T012-T013: Critical Risk 대응
+- [T006](https://github.com/serithemage/handson-vibecoding-demo/issues/34): 정보보호 조직 구성
+- [T007](https://github.com/serithemage/handson-vibecoding-demo/issues/35): 기본 정책 수립
+- [T008-T009](https://github.com/serithemage/handson-vibecoding-demo/issues/36): 정보자산 관리 체계
+- [T010-T011](https://github.com/serithemage/handson-vibecoding-demo/issues/39): 위험평가 체계
+- [T012-T013](https://github.com/serithemage/handson-vibecoding-demo/issues/40): Critical Risk 대응
 
 ### Phase 2: Protection (Week 13-20)
 **보안 시스템 구현**
-- T014-T015: 접근통제 (RBAC)
-- T016-T017: 데이터 암호화
-- T018-T019: 로그 관리 및 모니터링
+- [T014-T015](https://github.com/serithemage/handson-vibecoding-demo/issues/42): 접근통제 (RBAC)
+- [T016-T017](https://github.com/serithemage/handson-vibecoding-demo/issues/43): 데이터 암호화
+- [T018-T019](https://github.com/serithemage/handson-vibecoding-demo/issues/44): 로그 관리 및 모니터링
 - T020-T021: 운영 보안
 
 ### Phase 3: Compliance (Week 21-24)
 **개인정보보호 준수**
-- T022-T023: 개인정보 생명주기 관리
-- T024-T025: 정보주체 권리보호
+- [T022-T023](https://github.com/serithemage/handson-vibecoding-demo/issues/45): 개인정보 생명주기 관리
+- [T024-T025](https://github.com/serithemage/handson-vibecoding-demo/issues/46): 정보주체 권리보호
 
 ### Phase 4: Certification (Week 25-32)
 **인증 심사 대응**
-- T026-T027: 내부 감사
-- T028-T031: 모의 심사 및 준비
-- T032-T034: 인증 심사 및 취득
+- [T026-T027](https://github.com/serithemage/handson-vibecoding-demo/issues/47): 내부 감사
+- [T028-T031](https://github.com/serithemage/handson-vibecoding-demo/issues/48): 모의 심사 및 준비
+- [T032-T034](https://github.com/serithemage/handson-vibecoding-demo/issues/49): 인증 심사 및 취득
 
 ## 🏗️ 기술 아키텍처
 
@@ -166,16 +166,16 @@ graph TB
 
 ### GitHub Issues
 프로젝트의 모든 태스크는 GitHub Issues로 관리됩니다:
-- **Phase 0**: Issues #29-33
-- **Phase 1**: Issues #34-41  
-- **Phase 2**: Issues #42-44
-- **Phase 3**: Issues #45-46
-- **Phase 4**: Issues #47-49
+- **Phase 0**: Issues [#29](https://github.com/serithemage/handson-vibecoding-demo/issues/29)-[#33](https://github.com/serithemage/handson-vibecoding-demo/issues/33)
+- **Phase 1**: Issues [#34](https://github.com/serithemage/handson-vibecoding-demo/issues/34)-[#41](https://github.com/serithemage/handson-vibecoding-demo/issues/41)  
+- **Phase 2**: Issues [#42](https://github.com/serithemage/handson-vibecoding-demo/issues/42)-[#44](https://github.com/serithemage/handson-vibecoding-demo/issues/44)
+- **Phase 3**: Issues [#45](https://github.com/serithemage/handson-vibecoding-demo/issues/45)-[#46](https://github.com/serithemage/handson-vibecoding-demo/issues/46)
+- **Phase 4**: Issues [#47](https://github.com/serithemage/handson-vibecoding-demo/issues/47)-[#49](https://github.com/serithemage/handson-vibecoding-demo/issues/49)
 
 ### 기술 문서
-- `../design/security.md`: 보안 아키텍처 설계
-- `../requirements.md`: 보안 요구사항
-- `../tasks/`: 구현 체크리스트
+- [`../design/security.md`](../design/security.md): 보안 아키텍처 설계
+- [`../requirements.md`](../requirements.md): 보안 요구사항
+- [`../tasks/`](../tasks/): 구현 체크리스트
 
 ## 📈 프로젝트 진행 현황
 
