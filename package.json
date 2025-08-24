@@ -42,5 +42,8 @@
     "@aws-sdk/lib-dynamodb": "^3.830.0",
     "aws-sdk-client-mock": "^4.1.0",
     "husky": "^8.0.0"
+  },
+  "dependencies": {
+    "playwright": "^1.55.0"
   }
 }
