@@ -240,6 +240,7 @@ new events.Rule(this, 'WarmingRule', {
 **원인**: Vite 서버 설정 문제
 
 **해결 방법**:
+
 ```typescript
 // frontend/vite.config.ts
 export default defineConfig({
@@ -322,6 +323,7 @@ npm run backend:test
 **원인**: 심볼릭 링크 또는 빌드 순서 문제
 
 **해결 방법**:
+
 ```bash
 # 모든 워크스페이스 재빌드
 npm run build:all
@@ -423,7 +425,6 @@ npm install
 ```
 
 
----
 
 ## 추가 리소스
 
