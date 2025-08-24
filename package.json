@@ -27,7 +27,7 @@
     "backend:build": "cd backend && npm run build",
     "backend:test": "cd backend && npm run test",
     "backend:lint": "cd backend && npm run lint",
-    "prepare": "husky install",
+    "prepare": "husky",
     "cdk:synth": "cd backend && npm run cdk:synth",
     "cdk:deploy": "cd backend && npm run cdk:deploy",
     "cdk:destroy": "cd backend && npm run cdk:destroy",
@@ -39,9 +39,9 @@
     "npm": ">=10.0.0"
   },
   "devDependencies": {
-    "@aws-sdk/lib-dynamodb": "^3.830.0",
+    "@aws-sdk/lib-dynamodb": "^3.873.0",
     "aws-sdk-client-mock": "^4.1.0",
-    "husky": "^8.0.0"
+    "husky": "^9.1.7"
   },
   "dependencies": {
     "playwright": "^1.55.0"
